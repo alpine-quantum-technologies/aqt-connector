@@ -1,7 +1,7 @@
 """Provides entry points for authentication and session management."""
 
 import sys
-from typing import TextIO
+from typing import TextIO, Union
 
 from aqt_connector._arnica_app import ArnicaApp
 
@@ -38,7 +38,7 @@ def log_in(
     return access_token
 
 
-def get_access_token(app: ArnicaApp) -> str | None:
+def get_access_token(app: ArnicaApp) -> Union[str, None]:
     """Gets an access token for the current user session.
 
     Args:

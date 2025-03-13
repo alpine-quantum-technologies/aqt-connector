@@ -1,4 +1,5 @@
 from io import StringIO
+from typing import Optional, Union
 
 import pytest
 
@@ -19,7 +20,7 @@ class AuthAdapterSpyAlwaysAuthenticatesImmediately(Auth0Adapter):
             interval=5,
         )
 
-    def fetch_token_with_device_code(self, device_code: str) -> str | None:
+    def fetch_token_with_device_code(self, device_code: str) -> Union[str, None]:
         self.used_device_code = device_code
         return self.device_access_token
 
@@ -32,7 +33,7 @@ class AuthAdapterPollingSpy(Auth0Adapter):
         self.access_token = "this-is-the-device-token"
         self.token_poll_count = 0
 
-    def fetch_token_with_device_code(self, device_code: str) -> str | None:
+    def fetch_token_with_device_code(self, device_code: str) -> Union[str, None]:
         self.token_poll_count += 1
         if self.token_poll_count > 2:
             return self.access_token
@@ -50,7 +51,7 @@ class AuthAdapterPollingSpy(Auth0Adapter):
 class AuthAdapterNeverAuthenticates(Auth0Adapter):
     def __init__(self) -> None: ...
 
-    def fetch_token_with_device_code(self, device_code: str) -> str | None:
+    def fetch_token_with_device_code(self, device_code: str) -> Union[str, None]:
         raise AuthenticationError
 
     def fetch_device_code(self) -> DeviceCodeData:
@@ -77,7 +78,7 @@ class AccessTokenVerifierAlwaysRejects(AccessTokenVerifier):
 
 
 class StdoutSpy(StringIO):
-    def __init__(self, initial_value: str | None = "", newline: str | None = "\n") -> None:
+    def __init__(self, initial_value: Optional[str] = "", newline: Optional[str] = "\n") -> None:
         self.output: list[str] = []
         super().__init__(initial_value, newline)
 

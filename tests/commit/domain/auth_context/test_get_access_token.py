@@ -1,3 +1,5 @@
+from typing import Union
+
 from aqt_connector._domain.auth_context import AuthContext
 from aqt_connector._infrastructure.access_token_verifier import AccessTokenVerifier
 from aqt_connector._infrastructure.token_repository import TokenRepository
@@ -21,7 +23,7 @@ class AccessTokenVerifierAlwaysRejects(AccessTokenVerifier):
 class EmptyTokenRepository(TokenRepository):
     def __init__(self) -> None: ...
 
-    def load(self) -> str | None:
+    def load(self) -> Union[str, None]:
         return None
 
 
@@ -29,7 +31,7 @@ class NonEmptyTokenRepository(TokenRepository):
     def __init__(self) -> None:
         self.saved_token: str = "this_is_the_stored_token"
 
-    def load(self) -> str | None:
+    def load(self) -> Union[str, None]:
         return self.saved_token
 
 

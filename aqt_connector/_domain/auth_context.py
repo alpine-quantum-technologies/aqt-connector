@@ -1,3 +1,5 @@
+from typing import Union
+
 from aqt_connector._infrastructure.access_token_verifier import AccessTokenVerifier
 from aqt_connector._infrastructure.token_repository import TokenRepository
 from aqt_connector.exceptions import TokenValidationError
@@ -16,7 +18,7 @@ class AuthContext:
         self._token_verifier = access_token_verifier
         self._token_repo = token_repository
 
-    def get_access_token(self) -> str | None:
+    def get_access_token(self) -> Union[str, None]:
         """Loads an access token if a valid one is stored.
 
         Returns:

@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, Optional
 
 import typer
 
@@ -13,9 +13,9 @@ app = typer.Typer()
 
 @app.command(name="log-in")
 def log_in_command(
-    client_id: Annotated[str | None, typer.Option(help="Client ID")] = None,
-    client_secret: Annotated[str | None, typer.Option(help="Client secret")] = None,
-    arnica_url: Annotated[str | None, typer.Option(help="The URL of the Arnica API")] = None,
+    client_id: Annotated[Optional[str], typer.Option(help="Client ID")] = None,
+    client_secret: Annotated[Optional[str], typer.Option(help="Client secret")] = None,
+    arnica_url: Annotated[Optional[str], typer.Option(help="The URL of the Arnica API")] = None,
 ):
     config = ArnicaConfig(app_dir=Path(typer.get_app_dir(APP_NAME)))
     if arnica_url:

@@ -1,5 +1,5 @@
 import sys
-from typing import TextIO
+from typing import Optional, TextIO, Union
 
 import pytest
 
@@ -12,7 +12,7 @@ class OIDCContextAlwaysAuthenticates(OIDCContext):
     def __init__(self) -> None:
         self.client_access_token = "this-is-the-client-token"
         self.device_access_token = "this-is-the-device-token"
-        self.used_credentials: tuple[str, str] | None = None
+        self.used_credentials: Optional[tuple[str, str]] = None
 
     def authenticate_with_client_credentials(self, client_credentials) -> str:
         self.used_credentials = client_credentials
@@ -29,15 +29,15 @@ class AuthenticatedAuthContext(AuthContext):
     def save_access_token(self, access_token: str) -> None:
         self.stored_access_token = access_token
 
-    def get_access_token(self) -> str | None:
+    def get_access_token(self) -> Union[str, None]:
         return self.stored_access_token
 
 
 class UnauthenticatedAuthContext(AuthContext):
     def __init__(self) -> None:
-        self.stored_access_token: str | None = None
+        self.stored_access_token: Union[str, None] = None
 
-    def get_access_token(self) -> str | None:
+    def get_access_token(self) -> Union[str, None]:
         return self.stored_access_token
 
     def save_access_token(self, access_token: str) -> None:

@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Union
 
 
 class TokenRepository:
@@ -25,7 +26,7 @@ class TokenRepository:
         with open(self.filepath, "w") as f:
             f.write(token)
 
-    def load(self) -> str | None:
+    def load(self) -> Union[str, None]:
         """Loads an access token from disk.
 
         Returns:
