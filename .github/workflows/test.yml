@@ -41,6 +41,9 @@ jobs:
       - name: Install all depedencies
         run: poetry install --sync --all-extras
 
+      - name: Check pyproject.toml formatting
+        run: poetry run pyproject-fmt  pyproject.toml --check
+
       - name: Linting
         run: poetry run ruff check
 

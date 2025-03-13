@@ -1508,6 +1508,40 @@ docs = ["sphinx", "sphinx-rtd-theme", "zope.interface"]
 tests = ["coverage[toml] (==5.0.4)", "pytest (>=6.0.0,<7.0.0)"]
 
 [[package]]
+name = "pyproject-fmt"
+version = "2.5.1"
+description = "Format your pyproject.toml file"
+optional = false
+python-versions = ">=3.9"
+files = [
+    {file = "pyproject_fmt-2.5.1-cp38-abi3-macosx_10_12_x86_64.whl", hash = "sha256:a83bc42a8b5c9fd2d83773c741f79aa160039f4bba239818b48b0304a5616f8f"},
+    {file = "pyproject_fmt-2.5.1-cp38-abi3-macosx_11_0_arm64.whl", hash = "sha256:3fc6698e5b4715a119b693cddf4e75bea3c1427e1eb226ae67b1b292b4758aea"},
+    {file = "pyproject_fmt-2.5.1-cp38-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:2a4e60c635284c375091f1fb3cbc3dad078c921117f6120cf2f5379d21a7d763"},
+    {file = "pyproject_fmt-2.5.1-cp38-abi3-manylinux_2_17_armv7l.manylinux2014_armv7l.whl", hash = "sha256:64e2c7a3c2ecc61602a66fc2e99632443852bb86d8659c368f700f607c9e37b9"},
+    {file = "pyproject_fmt-2.5.1-cp38-abi3-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl", hash = "sha256:2a657e4be521b708212aea3eec1c158e1f6d7565f5f959182d9fbc3353394e62"},
+    {file = "pyproject_fmt-2.5.1-cp38-abi3-manylinux_2_17_s390x.manylinux2014_s390x.whl", hash = "sha256:4305973689b4771b57a1cac22d121a26a4dd63ca98e16337e2af250baad4bbd1"},
+    {file = "pyproject_fmt-2.5.1-cp38-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:1e9946683ec670e3df17055f5d7777bf5fde7e08575519208b7da7e403e63216"},
+    {file = "pyproject_fmt-2.5.1-cp38-abi3-manylinux_2_5_i686.manylinux1_i686.whl", hash = "sha256:1f32d4448328b6f5802b378161464abe9e0aedab9d5c198ff58705439c73f957"},
+    {file = "pyproject_fmt-2.5.1-cp38-abi3-musllinux_1_1_i686.whl", hash = "sha256:1cdd7d4c123b6aa24ff2d35b8588637fa48e85dae3facbc9dceabc194455c264"},
+    {file = "pyproject_fmt-2.5.1-cp38-abi3-musllinux_1_1_x86_64.whl", hash = "sha256:72190f04046e7d5563098c7819a1619c8c76a7563db17e596a31c17e1e230320"},
+    {file = "pyproject_fmt-2.5.1-cp38-abi3-win32.whl", hash = "sha256:4adef8404cee61aeb18fa1b6a48ce4f3988ba4ca62188ab2b888188fe5e8209f"},
+    {file = "pyproject_fmt-2.5.1-cp38-abi3-win_amd64.whl", hash = "sha256:00143e613e092b994cb609a2cb28e3fec6aca897fd8da21bc190d318883c97a3"},
+    {file = "pyproject_fmt-2.5.1-pp310-pypy310_pp73-macosx_10_12_x86_64.whl", hash = "sha256:bf0d77036faf7ddd6ca69a4930269ae70839604972dc10fbbf280590973c8e40"},
+    {file = "pyproject_fmt-2.5.1-pp310-pypy310_pp73-macosx_11_0_arm64.whl", hash = "sha256:d16223a6536bbf6b591577e6cd6db26689548a128e9b17d9f167bae0831a752a"},
+    {file = "pyproject_fmt-2.5.1-pp310-pypy310_pp73-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:29554bb6464b374aadc925d21c2cb608614c55f08ede382a707ca5a264cf5eb5"},
+    {file = "pyproject_fmt-2.5.1-pp38-pypy38_pp73-macosx_10_12_x86_64.whl", hash = "sha256:f812fdc0b7313796fa7f7a98aa7c9bbca72576d63ba25ac94c1d8b4e8925ab4a"},
+    {file = "pyproject_fmt-2.5.1-pp38-pypy38_pp73-macosx_11_0_arm64.whl", hash = "sha256:7f7f5486a14c01d1dcaecdd9137f7e14bc1684beeab5486fcf54374f7d247e9c"},
+    {file = "pyproject_fmt-2.5.1-pp38-pypy38_pp73-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:c876b75e45e3eb5ae8139bed1f5abf79fe14c75e87ffd2c249d973368419b6a8"},
+    {file = "pyproject_fmt-2.5.1-pp39-pypy39_pp73-macosx_10_12_x86_64.whl", hash = "sha256:c798eac36f13e55b7282504eeda3994c34293c5754dc7a076ee19ce647804804"},
+    {file = "pyproject_fmt-2.5.1-pp39-pypy39_pp73-macosx_11_0_arm64.whl", hash = "sha256:b60465aec447ee7cddc4678eb678610e642700fa7238e0cbda8bf01eb45d934f"},
+    {file = "pyproject_fmt-2.5.1-pp39-pypy39_pp73-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:f5ef4fdbec6f161e79d2fab332586ea2a9988a108060757439d4810fd9bfe787"},
+    {file = "pyproject_fmt-2.5.1.tar.gz", hash = "sha256:c7dfe1f62cc91fdf7ec73043b12c0df03a9a828ce09067fa4bb522fea5b24269"},
+]
+
+[package.dependencies]
+toml-fmt-common = "1.0.1"
+
+[[package]]
 name = "pytest"
 version = "8.3.3"
 description = "pytest: simple powerful testing with Python"
@@ -1715,6 +1749,20 @@ files = [
 ]
 
 [[package]]
+name = "toml-fmt-common"
+version = "1.0.1"
+description = "Common logic to the TOML formatter."
+optional = false
+python-versions = ">=3.9"
+files = [
+    {file = "toml_fmt_common-1.0.1-py3-none-any.whl", hash = "sha256:7a6542e36a7167fa94b8b997d3f8debadbb4ab757c7d78a77304579bd7a0cc7d"},
+    {file = "toml_fmt_common-1.0.1.tar.gz", hash = "sha256:7a29e99e527ffac456043296a0f1d8c03aaa1b06167bd39ad5e3cc5041f31c17"},
+]
+
+[package.dependencies]
+tomli = {version = ">=2.0.2", markers = "python_version < \"3.11\""}
+
+[[package]]
 name = "tomli"
 version = "2.1.0"
 description = "A lil' TOML parser"
@@ -1907,4 +1955,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<3.14"
-content-hash = "fa90c357ce83b8335de937fcd0b1e05f1a9db35f4e531e40544ab79be05dde73"
+content-hash = "1b524173ee6cd4f442c93ec96dcc015fa4bbe6f05a076d4036537654189393e0"
