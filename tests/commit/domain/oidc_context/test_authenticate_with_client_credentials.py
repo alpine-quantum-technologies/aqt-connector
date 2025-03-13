@@ -1,9 +1,9 @@
 import pytest
 
-from aqt_connector.domain.oidc_context import OIDCContext
+from aqt_connector._domain.oidc_context import OIDCContext
+from aqt_connector._infrastructure.access_token_verifier import AccessTokenVerifier
+from aqt_connector._infrastructure.auth0_adapter import Auth0Adapter
 from aqt_connector.exceptions import AuthenticationError, TokenValidationError
-from aqt_connector.infrastructure.access_token_verifier import AccessTokenVerifier
-from aqt_connector.infrastructure.auth0_adapter import Auth0Adapter
 
 
 class AuthAdapterSpyAlwaysAuthenticates(Auth0Adapter):

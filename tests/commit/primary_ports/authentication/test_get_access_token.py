@@ -1,5 +1,5 @@
 from aqt_connector import ArnicaApp, ArnicaConfig, get_access_token
-from aqt_connector.domain.auth_context import AuthContext
+from aqt_connector._domain.auth_context import AuthContext
 
 
 def test_it_gets_the_stored_access_token() -> None:

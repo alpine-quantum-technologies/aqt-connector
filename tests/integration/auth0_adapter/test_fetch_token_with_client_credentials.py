@@ -3,8 +3,8 @@ from typing import Final
 
 import pytest
 
+from aqt_connector._infrastructure.auth0_adapter import Auth0Adapter, AuthenticationConfig
 from aqt_connector.exceptions import AuthenticationError
-from aqt_connector.infrastructure.auth0_adapter import Auth0Adapter, AuthenticationConfig
 
 TEST_TENANT_DOMAIN: Final = os.getenv("AUTH0_TEST_TENANT_DOMAIN", "")
 TEST_AUDIENCE: Final = os.getenv("AUTH0_TEST_CLIENT_CREDENTIALS_AUDIENCE", "")

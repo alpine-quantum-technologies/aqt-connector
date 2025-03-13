@@ -1,6 +1,6 @@
+from aqt_connector._infrastructure.access_token_verifier import AccessTokenVerifier
+from aqt_connector._infrastructure.token_repository import TokenRepository
 from aqt_connector.exceptions import TokenValidationError
-from aqt_connector.infrastructure.access_token_verifier import AccessTokenVerifier
-from aqt_connector.infrastructure.token_repository import TokenRepository
 
 
 class AuthContext:

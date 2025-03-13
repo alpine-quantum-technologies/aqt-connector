@@ -6,8 +6,8 @@ from typing import Final
 import httpx
 import pytest
 
+from aqt_connector._infrastructure.access_token_verifier import AccessTokenVerifier, AccessTokenVerifierConfig
 from aqt_connector.exceptions import TokenValidationError
-from aqt_connector.infrastructure.access_token_verifier import AccessTokenVerifier, AccessTokenVerifierConfig
 
 TEST_TENANT_DOMAIN: Final = os.getenv("AUTH0_TEST_TENANT_DOMAIN", "")
 TEST_AUDIENCE: Final = os.getenv("AUTH0_TEST_CLIENT_CREDENTIALS_AUDIENCE", "")

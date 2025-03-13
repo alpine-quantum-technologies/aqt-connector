@@ -2,9 +2,9 @@ import urllib.parse
 
 import httpx
 
-from aqt_connector.data_types import DeviceCodeData
+from aqt_connector._data_types import DeviceCodeData
+from aqt_connector._sdk_config import AuthenticationConfig
 from aqt_connector.exceptions import AuthenticationError
-from aqt_connector.sdk_config import AuthenticationConfig
 
 
 class Auth0Adapter:

@@ -4,8 +4,8 @@ from typing import TextIO
 import pytest
 
 from aqt_connector import ArnicaApp, ArnicaConfig, log_in
-from aqt_connector.domain.auth_context import AuthContext
-from aqt_connector.domain.oidc_context import OIDCContext
+from aqt_connector._domain.auth_context import AuthContext
+from aqt_connector._domain.oidc_context import OIDCContext
 
 
 class OIDCContextAlwaysAuthenticates(OIDCContext):

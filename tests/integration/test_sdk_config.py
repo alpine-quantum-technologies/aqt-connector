@@ -1,6 +1,6 @@
 import os
 
-from aqt_connector.sdk_config import ArnicaConfig
+from aqt_connector._sdk_config import ArnicaConfig
 
 
 def test_it_loads_config_from_the_config_file(tmp_path) -> None:

@@ -3,8 +3,7 @@ from typing import Annotated
 
 import typer
 
-from aqt_connector import ArnicaConfig, log_in
-from aqt_connector.arnica_app import ArnicaApp
+from aqt_connector import ArnicaApp, ArnicaConfig, log_in
 from aqt_connector.exceptions import AuthenticationError
 
 APP_NAME = "aqt"

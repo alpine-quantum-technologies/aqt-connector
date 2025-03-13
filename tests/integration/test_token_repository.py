@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from aqt_connector.infrastructure.token_repository import TokenRepository
+from aqt_connector._infrastructure.token_repository import TokenRepository
 
 
 def test_it_saves_the_token_to_the_app_dir(tmp_path: Path) -> None:

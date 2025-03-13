@@ -1,27 +1,21 @@
-from aqt_connector.domain.auth_context import AuthContext
-from aqt_connector.domain.oidc_context import OIDCContext
-from aqt_connector.infrastructure.access_token_verifier import AccessTokenVerifier, AccessTokenVerifierConfig
-from aqt_connector.infrastructure.auth0_adapter import Auth0Adapter
-from aqt_connector.infrastructure.token_repository import TokenRepository
-from aqt_connector.sdk_config import ArnicaConfig
+from aqt_connector._domain.auth_context import AuthContext
+from aqt_connector._domain.oidc_context import OIDCContext
+from aqt_connector._infrastructure.access_token_verifier import AccessTokenVerifier, AccessTokenVerifierConfig
+from aqt_connector._infrastructure.auth0_adapter import Auth0Adapter
+from aqt_connector._infrastructure.token_repository import TokenRepository
+from aqt_connector._sdk_config import ArnicaConfig
 
 DEFAULT_CONFIG = ArnicaConfig()
 
 
 class ArnicaApp:
-    """SDK configuration defining handlers.
-
-    Attributes:
-        authenticate: handler to authenticate a user.
-        get_stored_access_token: handler to get a stored access token.
-    """
+    """Holds the initialization information for the application."""
 
     def __init__(self, config: ArnicaConfig = DEFAULT_CONFIG) -> None:
-        """Initialises the instance with the given config.
-
+        """
         Args:
             config (ArnicaConfig, optional): the configuration for the instance. Defaults to
-                DEFAULT_CONFIG.
+                an unmodified instance of `ArnicaConfig`.
         """
         self.config = config
 

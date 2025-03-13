@@ -3,7 +3,7 @@
 import sys
 from typing import TextIO
 
-from aqt_connector.arnica_app import ArnicaApp
+from aqt_connector._arnica_app import ArnicaApp
 
 
 def log_in(

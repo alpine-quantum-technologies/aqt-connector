@@ -32,7 +32,11 @@ class ArnicaConfig:
     """
 
     def __init__(self, app_dir: Path = DEFAULT_APP_DIR) -> None:
-        """Initialises the config."""
+        """
+        Args:
+            app_dir (Path, optional): the directory where the application will store its config and
+                cache files. Defaults to `Path.home() / .aqt`.
+        """
         self.app_dir = app_dir
         self.arnica_url = "https://arnica.aqt.eu/api"
         self.client_id: str | None = None
@@ -40,9 +44,9 @@ class ArnicaConfig:
         self.store_access_token = True
         self.oidc_config = AuthenticationConfig()
 
-        self.read_config()
+        self._read_config()
 
-    def read_config(self) -> None:
+    def _read_config(self) -> None:
         """Reads config from the host system."""
         config: dict[str, str] = {}
         config = self._add_file_config(config, self.app_dir / "config")
