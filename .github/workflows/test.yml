@@ -65,3 +65,41 @@ jobs:
           name: pytest-results-${{ matrix.python-version }}-${{ matrix.os }}
           path: junit/test-results-${{ matrix.python-version }}-${{ matrix.os }}.xml
         if: ${{ always() }}
+
+      - name: Check for changes requiring integration testing
+        id: changed-files
+        uses: tj-actions/changed-files@v45
+        with:
+          files: |
+            aqt_connector/infrastructure/**
+            tests/integration/**
+
+      - name: Run integration tests upon changes
+        if: steps.changed-files.outputs.any_changed == 'true'
+        run: poetry run pytest ./tests/integration/ 
+        env: 
+          AUTH0_TEST_TENANT_DOMAIN: ${{ secrets.AUTH0_TEST_TENANT_DOMAIN }}
+          AUTH0_TEST_DEVICE_FLOW_CLIENT_ID: ${{ secrets.AUTH0_TEST_DEVICE_FLOW_CLIENT_ID }}
+          AUTH0_TEST_CLIENT_CREDENTIALS_CLIENT_ID: ${{ secrets.AUTH0_TEST_CLIENT_CREDENTIALS_CLIENT_ID }}
+          AUTH0_TEST_CLIENT_CREDENTIALS_CLIENT_SECRET: ${{ secrets.AUTH0_TEST_CLIENT_CREDENTIALS_CLIENT_SECRET }}
+          AUTH0_TEST_CLIENT_CREDENTIALS_AUDIENCE: ${{ secrets.AUTH0_TEST_CLIENT_CREDENTIALS_AUDIENCE }}
+          AUTH0_TEST_DEVICE_FLOW_USER_EMAIL: ${{ secrets.AUTH0_TEST_DEVICE_FLOW_USER_EMAIL }}
+          AUTH0_TEST_DEVICE_FLOW_USER_PASSWORD: ${{ secrets.AUTH0_TEST_DEVICE_FLOW_USER_PASSWORD }}
+
+  build:
+    needs: test
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install all depedencies
+        run: poetry install --sync --all-extras
+
+      - name: Build release distributions
+        run: poetry build
+
+      - name: Upload distributions
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-dists
+          path: dist/
