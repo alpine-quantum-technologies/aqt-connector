@@ -1,0 +1,64 @@
+name: Test
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches:  [ "main" ]
+  workflow_dispatch:
+
+env:
+  PYTHONIOENCODING: utf-8
+
+jobs:
+  test:
+    name: test-python${{ matrix.python-version }}-${{ matrix.os }}
+
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        python-version: ['3.9', '3.10', '3.11', '3.12', '3.13']
+        poetry-version: [1.8.3]
+        os: ["ubuntu-latest", "windows-latest"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install poetry
+        uses: abatilo/actions-poetry@v2
+        with:
+          poetry-version: ${{ matrix.poetry-version }}
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+            python-version: ${{ matrix.python-version }}
+            cache: "poetry"
+
+      - name: Check Poetry lock file status
+        run: poetry check --lock
+
+      - name: Install all depedencies
+        run: poetry install --sync --all-extras
+
+      - name: Linting
+        run: poetry run ruff check
+
+      - name: Spellchecking
+        run: poetry run typos
+
+      - name: Check formatting
+        run: poetry run ruff format --check
+
+      - name: Typecheck
+        run: poetry run mypy .
+
+      - name: Unit tests
+        run: poetry run pytest ./tests/commit/ --doctest-modules --junitxml=junit/test-results-${{ matrix.python-version }}.xml
+
+      - name: Upload pytest test results
+        uses: actions/upload-artifact@v4
+        with:
+          name: pytest-results-${{ matrix.python-version }}
+          path: junit/test-results-${{ matrix.python-version }}.xml
+        if: ${{ always() }}
