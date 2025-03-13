@@ -92,7 +92,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Install all depedencies
+      - uses: actions/checkout@v4
+
+      - name: Install poetry
+        uses: abatilo/actions-poetry@v2
+        with:
+          poetry-version: 1.8.3
+
+      - name: Install all dependencies
         run: poetry install --sync --all-extras
 
       - name: Build release distributions
