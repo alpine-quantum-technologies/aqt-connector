@@ -13,11 +13,11 @@ def test_it_gets_the_stored_access_token() -> None:
             return self.token
 
     app = ArnicaApp(ArnicaConfig())
-    app.auth_context = AuthContextDummy()
+    app.auth_service = AuthContextDummy()
 
     access_token = get_access_token(app)
 
-    assert access_token == app.auth_context.token
+    assert access_token == app.auth_service.token
 
 
 def test_it_returns_none_if_no_stored_access_token() -> None:
@@ -28,7 +28,7 @@ def test_it_returns_none_if_no_stored_access_token() -> None:
             return None
 
     app = ArnicaApp(ArnicaConfig())
-    app.auth_context = AuthContextDummy()
+    app.auth_service = AuthContextDummy()
 
     access_token = get_access_token(app)
 

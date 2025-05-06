@@ -26,5 +26,5 @@ class ArnicaApp:
                 allowed_audiences=[config.arnica_url, config.oidc_config.device_client_id],
             )
         )
-        self.auth_context = AuthService(token_verifier, TokenRepository(config.app_dir))
-        self.oidc_context = OIDCService(Auth0Adapter(config.oidc_config), token_verifier)
+        self.auth_service = AuthService(token_verifier, TokenRepository(config.app_dir))
+        self.oidc_service = OIDCService(Auth0Adapter(config.oidc_config), token_verifier)
