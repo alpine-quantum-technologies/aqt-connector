@@ -4,7 +4,7 @@ from typing import Optional, Union
 import pytest
 
 from aqt_connector._data_types import DeviceCodeData
-from aqt_connector._domain.oidc_context import OIDCContext
+from aqt_connector._domain.oidc_service import OIDCService
 from aqt_connector._infrastructure.access_token_verifier import AccessTokenVerifier
 from aqt_connector._infrastructure.auth0_adapter import Auth0Adapter
 from aqt_connector.exceptions import AuthenticationError, TokenValidationError
@@ -93,7 +93,7 @@ class StdoutSpy(StringIO):
 
 def test_it_displays_the_verification_uri_and_user_code() -> None:
     auth_adapter = AuthAdapterSpyAlwaysAuthenticatesImmediately()
-    context = OIDCContext(
+    context = OIDCService(
         auth_adapter,
         AccessTokenVerifierAlwaysVerifies(),
     )
@@ -107,7 +107,7 @@ def test_it_displays_the_verification_uri_and_user_code() -> None:
 
 def test_it_displays_a_qr_code_for_the_verification_uri() -> None:
     auth_adapter = AuthAdapterSpyAlwaysAuthenticatesImmediately()
-    context = OIDCContext(
+    context = OIDCService(
         auth_adapter,
         AccessTokenVerifierAlwaysVerifies(),
     )
@@ -150,7 +150,7 @@ def test_it_displays_a_qr_code_for_the_verification_uri() -> None:
 
 def test_it_polls_the_token_endpoint_until_id_token_available() -> None:
     auth_adapter = AuthAdapterPollingSpy()
-    context = OIDCContext(
+    context = OIDCService(
         auth_adapter,
         AccessTokenVerifierAlwaysVerifies(),
     )
@@ -161,7 +161,7 @@ def test_it_polls_the_token_endpoint_until_id_token_available() -> None:
 
 
 def test_it_raises_error_when_id_token_invalid() -> None:
-    context = OIDCContext(
+    context = OIDCService(
         AuthAdapterSpyAlwaysAuthenticatesImmediately(),
         AccessTokenVerifierAlwaysRejects(),
     )
@@ -171,7 +171,7 @@ def test_it_raises_error_when_id_token_invalid() -> None:
 
 
 def test_it_raises_error_when_authentication_fails() -> None:
-    context = OIDCContext(
+    context = OIDCService(
         AuthAdapterNeverAuthenticates(),
         AccessTokenVerifierAlwaysVerifies(),
     )

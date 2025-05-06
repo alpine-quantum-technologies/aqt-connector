@@ -2,7 +2,7 @@ from typing import Optional
 
 import pytest
 
-from aqt_connector._domain.oidc_context import OIDCContext
+from aqt_connector._domain.oidc_service import OIDCService
 from aqt_connector._infrastructure.access_token_verifier import AccessTokenVerifier
 from aqt_connector._infrastructure.auth0_adapter import Auth0Adapter
 from aqt_connector.exceptions import AuthenticationError, TokenValidationError
@@ -41,7 +41,7 @@ class AccessTokenVerifierAlwaysRejects(AccessTokenVerifier):
 
 def test_it_retrieves_token_with_the_given_credentials() -> None:
     auth_adapter = AuthAdapterSpyAlwaysAuthenticates()
-    context = OIDCContext(auth_adapter, AccessTokenVerifierAlwaysVerifies())
+    context = OIDCService(auth_adapter, AccessTokenVerifierAlwaysVerifies())
     credentials = ("client-id", "client-secret")
 
     retrieved_token = context.authenticate_with_client_credentials(credentials)
@@ -51,14 +51,14 @@ def test_it_retrieves_token_with_the_given_credentials() -> None:
 
 
 def test_it_raises_token_validation_error_when_retrieved_token_invalid() -> None:
-    context = OIDCContext(AuthAdapterSpyAlwaysAuthenticates(), AccessTokenVerifierAlwaysRejects())
+    context = OIDCService(AuthAdapterSpyAlwaysAuthenticates(), AccessTokenVerifierAlwaysRejects())
 
     with pytest.raises(TokenValidationError):
         context.authenticate_with_client_credentials(("client-id", "client-secret"))
 
 
 def test_it_raises_authentication_error_when_authentication_fails() -> None:
-    context = OIDCContext(AuthAdapterNeverAuthenticates(), AccessTokenVerifierAlwaysVerifies())
+    context = OIDCService(AuthAdapterNeverAuthenticates(), AccessTokenVerifierAlwaysVerifies())
 
     with pytest.raises(AuthenticationError):
         context.authenticate_with_client_credentials(("client-id", "client-secret"))

@@ -10,7 +10,7 @@ from aqt_connector._infrastructure.auth0_adapter import Auth0Adapter
 from aqt_connector.exceptions import TokenValidationError
 
 
-class OIDCContext:
+class OIDCService:
     """Authenticates with OIDC."""
 
     def __init__(

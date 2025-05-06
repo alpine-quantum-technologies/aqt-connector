@@ -5,7 +5,7 @@ from aqt_connector._infrastructure.token_repository import TokenRepository
 from aqt_connector.exceptions import TokenValidationError
 
 
-class AuthContext:
+class AuthService:
     """Manages access tokens."""
 
     def __init__(self, access_token_verifier: AccessTokenVerifier, token_repository: TokenRepository) -> None:

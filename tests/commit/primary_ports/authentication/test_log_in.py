@@ -4,11 +4,11 @@ from typing import Optional, TextIO, Union
 import pytest
 
 from aqt_connector import ArnicaApp, ArnicaConfig, log_in
-from aqt_connector._domain.auth_context import AuthContext
-from aqt_connector._domain.oidc_context import OIDCContext
+from aqt_connector._domain.auth_service import AuthService
+from aqt_connector._domain.oidc_service import OIDCService
 
 
-class OIDCContextAlwaysAuthenticates(OIDCContext):
+class OIDCContextAlwaysAuthenticates(OIDCService):
     def __init__(self) -> None:
         self.client_access_token = "this-is-the-client-token"
         self.device_access_token = "this-is-the-device-token"
@@ -22,7 +22,7 @@ class OIDCContextAlwaysAuthenticates(OIDCContext):
         return self.device_access_token
 
 
-class AuthenticatedAuthContext(AuthContext):
+class AuthenticatedAuthContext(AuthService):
     def __init__(self) -> None:
         self.stored_access_token = "this-is-the-existing-token"
 
@@ -33,7 +33,7 @@ class AuthenticatedAuthContext(AuthContext):
         return self.stored_access_token
 
 
-class UnauthenticatedAuthContext(AuthContext):
+class UnauthenticatedAuthContext(AuthService):
     def __init__(self) -> None:
         self.stored_access_token: Union[str, None] = None
 

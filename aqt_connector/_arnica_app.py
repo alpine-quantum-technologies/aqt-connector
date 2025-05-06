@@ -1,5 +1,5 @@
-from aqt_connector._domain.auth_context import AuthContext
-from aqt_connector._domain.oidc_context import OIDCContext
+from aqt_connector._domain.auth_service import AuthService
+from aqt_connector._domain.oidc_service import OIDCService
 from aqt_connector._infrastructure.access_token_verifier import AccessTokenVerifier, AccessTokenVerifierConfig
 from aqt_connector._infrastructure.auth0_adapter import Auth0Adapter
 from aqt_connector._infrastructure.token_repository import TokenRepository
@@ -26,5 +26,5 @@ class ArnicaApp:
                 allowed_audiences=[config.arnica_url, config.oidc_config.device_client_id],
             )
         )
-        self.auth_context = AuthContext(token_verifier, TokenRepository(config.app_dir))
-        self.oidc_context = OIDCContext(Auth0Adapter(config.oidc_config), token_verifier)
+        self.auth_context = AuthService(token_verifier, TokenRepository(config.app_dir))
+        self.oidc_context = OIDCService(Auth0Adapter(config.oidc_config), token_verifier)
