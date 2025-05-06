@@ -5,7 +5,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field
 
-from aqt_connector._domain.models.circuits import QuantumCircuit
+from aqt_connector._models.circuits import QuantumCircuit
 
 
 class JobStatus(StrEnum):
@@ -37,6 +37,14 @@ class QuantumCircuits(BaseModel):
     circuits: list[QuantumCircuit] = Field(min_length=1, max_length=50)
 
 
+class QuantumCircuitJobSubmission(BaseModel):
+    """A Quantum Circuit job submission."""
+
+    job_type: Literal[JobType.QUANTUM_CIRCUIT] = JobType.QUANTUM_CIRCUIT
+    label: str | None = None
+    payload: QuantumCircuits
+
+
 class BasicJobMetadata(BaseModel):
     """Metadata for a user-submitted job."""
 
@@ -58,3 +66,10 @@ class RRQueued(BaseResponse):
     """Metadata for a queued job."""
 
     status: Literal[JobStatus.QUEUED] = JobStatus.QUEUED
+
+
+class SubmitJobResponse(BaseModel):
+    """Response body schema for the submit job endpoint."""
+
+    job: BasicJobMetadata
+    response: RRQueued = RRQueued()
