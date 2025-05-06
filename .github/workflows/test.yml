@@ -18,7 +18,7 @@ jobs:
     strategy:
       matrix:
         python-version: ['3.9', '3.10', '3.11', '3.12', '3.13']
-        poetry-version: [2.1.1]
+        uv-version: ["0.7.2"]
         os: ["ubuntu-latest", "windows-latest"]
 
     steps:
@@ -29,39 +29,34 @@ jobs:
         with:
             python-version: ${{ matrix.python-version }}
 
-      - name: Install poetry
-        uses: abatilo/actions-poetry@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
         with:
-          poetry-version: ${{ matrix.poetry-version }}
-      
-      - name: Setup a local virtual environment
-        run: |
-          poetry config virtualenvs.create true --local
-          poetry config virtualenvs.in-project true --local
+          version: ${{ matrix.uv-version }}
 
-      - name: Check Poetry lock file status
-        run: poetry check --lock
+      - name: Check lock file status
+        run: uv lock --check
 
       - name: Install all dependencies
-        run: poetry sync --all-extras
+        run: uv sync --all-groups
 
       - name: Check pyproject.toml formatting
-        run: poetry run pyproject-fmt  pyproject.toml --check
+        run: uvx pyproject-fmt pyproject.toml --check
 
       - name: Linting
-        run: poetry run ruff check
+        run: uvx ruff check
 
       - name: Spellchecking
-        run: poetry run typos
+        run: uvx typos
 
       - name: Check formatting
-        run: poetry run ruff format --check
+        run: uvx ruff format --check
 
       - name: Typecheck
-        run: poetry run mypy .
+        run: uv run mypy .
 
       - name: Unit tests
-        run: poetry run pytest ./tests/commit/ --doctest-modules --junitxml=junit/test-results-${{ matrix.python-version }}-${{ matrix.os }}.xml
+        run: uv run pytest ./tests/commit/ --doctest-modules --junitxml=junit/test-results-${{ matrix.python-version }}-${{ matrix.os }}.xml
 
       - name: Upload pytest test results
         uses: actions/upload-artifact@v4
@@ -80,7 +75,7 @@ jobs:
 
       - name: Run integration tests upon changes
         if: steps.changed-files.outputs.any_changed == 'true'
-        run: poetry run pytest ./tests/integration/ 
+        run: uvx playwright install && uv run pytest ./tests/integration/ 
         env: 
           AUTH0_TEST_TENANT_DOMAIN: ${{ secrets.AUTH0_TEST_TENANT_DOMAIN }}
           AUTH0_TEST_DEVICE_FLOW_CLIENT_ID: ${{ secrets.AUTH0_TEST_DEVICE_FLOW_CLIENT_ID }}
@@ -103,21 +98,16 @@ jobs:
         with:
             python-version: 3.12
 
-      - name: Install poetry
-        uses: abatilo/actions-poetry@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
         with:
-          poetry-version: 2.1.1
-
-      - name: Setup a local virtual environment
-        run: |
-          poetry config virtualenvs.create true --local
-          poetry config virtualenvs.in-project true --local
+          version: "0.7.2"
 
       - name: Install all dependencies
-        run: poetry sync --all-extras
+        run: uv sync --all-groups
 
       - name: Build release distributions
-        run: poetry build
+        run: uv build
 
       - name: Upload distributions
         uses: actions/upload-artifact@v4
