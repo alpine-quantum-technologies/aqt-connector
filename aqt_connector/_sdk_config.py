@@ -3,11 +3,9 @@ import re
 from copy import deepcopy
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Final, Union
+from typing import Union
 
 import tomli
-
-DEFAULT_APP_DIR: Final = Path.home() / ".aqt"
 
 
 @dataclass
@@ -23,21 +21,17 @@ class ArnicaConfig:
 
     Attributes:
         app_dir (Path): the directory where the application will store its config and
-            cache files
-        arnica_url (str): the base URL of the Arnica API.
-        client_id (str | None): the ID to use for authentication with client credentials.
-        client_secret (str | None): the secret to use for authentication with client credentials.
-        store_access_token (bool): when True, the access token will be persisted to disk.
+            cache files. Defaults to `Path.home() / .aqt`.
+        arnica_url (str): the base URL of the Arnica API. Defaults to "https://arnica.aqt.eu/api".
+        client_id (str | None): the ID to use for authentication with client credentials. Defaults to None.
+        client_secret (str | None): the secret to use for authentication with client credentials. Defaults to None.
+        store_access_token (bool): when True, the access token will be persisted to disk. Defaults to True.
         oidc_config (AuthenticationConfig): configuration for the OIDC provider.
     """
 
-    def __init__(self, app_dir: Path = DEFAULT_APP_DIR) -> None:
-        """
-        Args:
-            app_dir (Path, optional): the directory where the application will store its config and
-                cache files. Defaults to `Path.home() / .aqt`.
-        """
-        self.app_dir = app_dir
+    def __init__(self) -> None:
+        """Initializes the configuration."""
+        self.app_dir = Path.home() / ".aqt"
         self.arnica_url = "https://arnica.aqt.eu/api"
         self.client_id: Union[str, None] = None
         self.client_secret: Union[str, None] = None
