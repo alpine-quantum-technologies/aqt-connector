@@ -5,7 +5,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field
 
-from aqt_connector._models.circuits import QuantumCircuit
+from aqt_connector.models.circuits import QuantumCircuit
 
 
 class JobStatus(StrEnum):

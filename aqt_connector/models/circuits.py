@@ -5,7 +5,7 @@ from typing import Self
 
 from pydantic import BaseModel, Field, RootModel, model_validator
 
-from aqt_connector._models.operations import Gate, Measure, OperationModel, is_gate
+from aqt_connector.models.operations import Gate, Measure, OperationModel, is_gate
 
 
 class Circuit(RootModel[list[OperationModel]]):
