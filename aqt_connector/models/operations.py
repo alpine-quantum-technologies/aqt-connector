@@ -7,7 +7,7 @@ from typing import (
     Any,
     Final,
     Literal,
-    TypeGuard,
+    Union,
     final,
 )
 
@@ -20,7 +20,7 @@ from pydantic import (
     field_validator,
 )
 from pydantic.types import NonNegativeInt, conint
-from typing_extensions import TypeAlias
+from typing_extensions import TypeAlias, TypeGuard
 
 if TYPE_CHECKING:
     Bit = int
@@ -222,8 +222,8 @@ class Measure(AbstractOperation):
     operation: Literal["MEASURE"]
 
 
-Gate: TypeAlias = GateRZ | GateR | GateRXX
-Operation: TypeAlias = Gate | Measure
+Gate: TypeAlias = Union[GateRZ, GateR, GateRXX]
+Operation: TypeAlias = Union[Gate, Measure]
 
 
 class OperationModel(RootModel[Operation]):

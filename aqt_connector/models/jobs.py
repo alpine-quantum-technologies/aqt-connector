@@ -1,5 +1,6 @@
 from datetime import datetime
 from enum import Enum
+from typing import Optional
 from uuid import UUID
 
 from pydantic import BaseModel, Field
@@ -41,7 +42,7 @@ class QuantumCircuitJobSubmission(BaseModel):
     """A Quantum Circuit job submission."""
 
     job_type: Literal[JobType.QUANTUM_CIRCUIT] = JobType.QUANTUM_CIRCUIT
-    label: str | None = None
+    label: Optional[str] = None
     payload: QuantumCircuits
 
 
@@ -50,7 +51,7 @@ class BasicJobMetadata(BaseModel):
 
     job_id: UUID = Field(description="Id that uniquely identifies the job. This is used to request results.")
     job_type: Literal[JobType.QUANTUM_CIRCUIT] = JobType.QUANTUM_CIRCUIT
-    label: str | None = None
+    label: Optional[str] = None
     resource_id: str
     workspace_id: str
 
@@ -59,7 +60,7 @@ class BaseResponse(BaseModel):
     """Base schema for job result metadata."""
 
     status: JobStatus
-    timing_data: list[StatusChange] | None = None
+    timing_data: Optional[list[StatusChange]] = None
 
 
 class RRQueued(BaseResponse):
