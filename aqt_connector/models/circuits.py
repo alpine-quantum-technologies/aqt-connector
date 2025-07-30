@@ -1,9 +1,9 @@
 """ARNICA Core Quantum Circuit Models."""
 
 from collections.abc import Iterator
-from typing import Self
 
 from pydantic import BaseModel, Field, RootModel, model_validator
+from typing_extensions import Self
 
 from aqt_connector.models.operations import Gate, Measure, OperationModel, is_gate
 

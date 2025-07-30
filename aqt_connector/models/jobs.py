@@ -1,9 +1,9 @@
 from datetime import datetime
 from enum import StrEnum
-from typing import Literal
 from uuid import UUID
 
 from pydantic import BaseModel, Field
+from typing_extensions import Literal
 
 from aqt_connector.models.circuits import QuantumCircuit
 

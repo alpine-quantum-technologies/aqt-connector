@@ -7,7 +7,6 @@ from typing import (
     Any,
     Final,
     Literal,
-    TypeAlias,
     TypeGuard,
     final,
 )
@@ -21,6 +20,7 @@ from pydantic import (
     field_validator,
 )
 from pydantic.types import NonNegativeInt, conint
+from typing_extensions import TypeAlias
 
 if TYPE_CHECKING:
     Bit = int
