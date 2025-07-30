@@ -65,7 +65,7 @@ class BaseResponse(BaseModel):
 class RRQueued(BaseResponse):
     """Metadata for a queued job."""
 
-    status: Literal[JobStatus.QUEUED] = JobStatus.QUEUED
+    status: JobStatus = Field(default=JobStatus.QUEUED, frozen=True)
 
 
 class SubmitJobResponse(BaseModel):
