@@ -1,5 +1,5 @@
 from datetime import datetime
-from enum import StrEnum
+from enum import Enum
 from uuid import UUID
 
 from pydantic import BaseModel, Field
@@ -8,7 +8,7 @@ from typing_extensions import Literal
 from aqt_connector.models.circuits import QuantumCircuit
 
 
-class JobStatus(StrEnum):
+class JobStatus(Enum):
     """Status of a job."""
 
     CANCELLED = "cancelled"
@@ -18,7 +18,7 @@ class JobStatus(StrEnum):
     QUEUED = "queued"
 
 
-class JobType(StrEnum):
+class JobType(Enum):
     """Possible Arnica job types."""
 
     QUANTUM_CIRCUIT = "quantum_circuit"
