@@ -24,7 +24,7 @@ class AuthService:
         Returns:
             str | None: the access token, when a valid one is stored, otherwise None.
         """
-        loaded_token = self._token_repo.load()
+        loaded_token = self._token_repo.load_access_token()
         if loaded_token is None:
             return None
 
@@ -40,4 +40,4 @@ class AuthService:
         Args:
             access_token (str): the access token to store.
         """
-        self._token_repo.save(access_token)
+        self._token_repo.save_access_token(access_token)

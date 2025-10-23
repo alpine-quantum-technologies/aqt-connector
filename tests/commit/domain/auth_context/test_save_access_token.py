@@ -13,7 +13,7 @@ class TokenRepositorySpy(TokenRepository):
     def __init__(self) -> None:
         self.saved_token: Union[str, None] = None
 
-    def save(self, token: str) -> None:
+    def save_access_token(self, token: str) -> None:
         self.saved_token = token
 
 

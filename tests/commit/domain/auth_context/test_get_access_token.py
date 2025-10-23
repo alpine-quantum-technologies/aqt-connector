@@ -23,7 +23,7 @@ class AccessTokenVerifierAlwaysRejects(AccessTokenVerifier):
 class EmptyTokenRepository(TokenRepository):
     def __init__(self) -> None: ...
 
-    def load(self) -> Union[str, None]:
+    def load_access_token(self) -> Union[str, None]:
         return None
 
 
@@ -31,7 +31,7 @@ class NonEmptyTokenRepository(TokenRepository):
     def __init__(self) -> None:
         self.saved_token: str = "this_is_the_stored_token"
 
-    def load(self) -> Union[str, None]:
+    def load_access_token(self) -> Union[str, None]:
         return self.saved_token
 
 
