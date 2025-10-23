@@ -93,8 +93,8 @@ class OIDCService:
         device_code_data: DeviceCodeData,
     ) -> str:
         while True:
-            access_token = self._auth_adapter.fetch_token_with_device_code(device_code_data.device_code)
-            if access_token is not None:
-                return access_token
+            tokens = self._auth_adapter.fetch_token_with_device_code(device_code_data.device_code)
+            if tokens is not None:
+                return tokens.access_token
             else:
                 time.sleep(device_code_data.interval)

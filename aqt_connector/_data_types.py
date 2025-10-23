@@ -1,3 +1,5 @@
+from typing import NamedTuple
+
 from pydantic import BaseModel
 
 
@@ -8,3 +10,10 @@ class DeviceCodeData(BaseModel):
     user_code: str
     device_code: str
     interval: float
+
+
+class OfflineAccessTokens(NamedTuple):
+    """Access and refresh tokens for offline access."""
+
+    access_token: str
+    refresh_token: str

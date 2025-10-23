@@ -3,7 +3,7 @@ from typing import Union
 
 import httpx
 
-from aqt_connector._data_types import DeviceCodeData
+from aqt_connector._data_types import DeviceCodeData, OfflineAccessTokens
 from aqt_connector._sdk_config import AuthenticationConfig
 from aqt_connector.exceptions import AuthenticationError
 
@@ -53,7 +53,7 @@ class Auth0Adapter:
             return token_data["access_token"]
         raise AuthenticationError
 
-    def fetch_token_with_device_code(self, device_code: str) -> Union[str, None]:
+    def fetch_token_with_device_code(self, device_code: str) -> Union[OfflineAccessTokens, None]:
         """Fetches an access token with a device code.
 
         Fetches an access token with a device code, once the user has logged in.
@@ -66,7 +66,7 @@ class Auth0Adapter:
             indicate that authorization is still pending.
 
         Returns:
-            str | None: the resulting access token as a string once the user has successfully
+            OfflineAccessTokens | None: the resulting access token and refresh token once the user has successfully
             authenticated themselves, otherwise None.
         """
         token_payload = {
@@ -78,7 +78,10 @@ class Auth0Adapter:
         token_data = token_response.json()
 
         if token_response.status_code == 200:
-            return token_data["id_token"]
+            return OfflineAccessTokens(
+                access_token=token_data["id_token"],
+                refresh_token=token_data["refresh_token"],
+            )
 
         if token_data["error"] not in ("authorization_pending", "slow_down"):
             print(token_data)
@@ -100,7 +103,7 @@ class Auth0Adapter:
         """
         device_code_payload = {
             "client_id": self.device_client_id,
-            "scope": "openid profile",
+            "scope": "openid profile offline_access",
         }
         device_code_response = self._http_client.post(
             urllib.parse.urljoin(self.domain, "/oauth/device/code"), data=device_code_payload
@@ -114,4 +117,32 @@ class Auth0Adapter:
             user_code=device_code_data["user_code"],
             device_code=device_code_data["device_code"],
             interval=device_code_data["interval"],
+        )
+
+    def fetch_token_with_refresh_token(self, refresh_token: str) -> OfflineAccessTokens:
+        """Fetches an access token using a refresh token.
+
+        Args:
+            refresh_token (str): the refresh token.
+
+        Raises:
+            AuthenticationError: when authentication was unsuccessful.
+
+        Returns:
+            OfflineAccessTokens: the resulting access token and the next refresh token.
+        """
+        token_payload = {
+            "client_id": self.device_client_id,
+            "grant_type": "refresh_token",
+            "refresh_token": refresh_token,
+        }
+        token_response = self._http_client.post(urllib.parse.urljoin(self.domain, "/oauth/token"), data=token_payload)
+        if token_response.status_code != 200:
+            error = token_response.json()
+            raise AuthenticationError(error.get("error_description", "Failed to refresh token."))
+
+        token_data = token_response.json()
+        return OfflineAccessTokens(
+            access_token=token_data["access_token"],
+            refresh_token=token_data["refresh_token"],
         )
