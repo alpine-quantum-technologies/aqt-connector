@@ -1,5 +1,9 @@
 # aqt-connector
 
+## License
+This software is licensed under the Apache License 2.0, see the [LICENSE file](LICENSE) for details.
+
+
 ## Configuration
 ### Precedence
 1. Command line options

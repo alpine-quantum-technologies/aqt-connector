@@ -6,11 +6,21 @@ requires = [ "hatchling" ]
 [project]
 name = "aqt-connector"
 version = "0.1.0"
-description = ""
+license = "Apache License Version 2.0"
+license-files = ["LICENSE"]
+description = "Python connector for services provided by AQT"
 readme = "README.md"
 authors = [
   { name = "Alpine Quantum Technologies GmbH", email = "support.arnica@aqt.eu" },
 ]
+keywords = [
+  "AQT", 
+  "Alpine Quantum Technologies GmbH",
+  "Quantum Computing", 
+  "Arnica", 
+  "Direct Access API",
+]
+
 requires-python = ">=3.9,<3.14"
 
 classifiers = [
@@ -33,6 +43,13 @@ packages = [
   { include = "aqt_connector" },
   { include = "tests", format = "sdist" },
 ]
+
+[project.urls]
+Homepage = "https://www.aqt.eu/products/arnica/"
+Documentation = "https://github.com/alpine-quantum-technologies/aqt-connector/blob/main/README.md"
+Repository = "https://github.com/alpine-quantum-technologies/aqt-connector"
+Issues = "https://github.com/alpine-quantum-technologies/aqt-connector/issues"
+Changelog = "https://github.com/alpine-quantum-technologies/aqt-connector/blob/main/CHANGELOG.md"
 
 [dependency-groups]
 dev = [
