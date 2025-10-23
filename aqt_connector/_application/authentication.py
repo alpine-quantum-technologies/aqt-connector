@@ -47,4 +47,4 @@ def get_access_token(app: ArnicaApp) -> Union[str, None]:
     Returns:
         str | None: the access token if the user has an active session, otherwise None.
     """
-    return app.auth_service.get_access_token()
+    return app.auth_service.get_or_refresh_access_token(store=app.config.store_access_token)
