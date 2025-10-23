@@ -20,7 +20,7 @@ def log_in(
     Returns:
         str: the user's access token.
     """
-    existing_valid_token = app.auth_service.get_access_token()
+    existing_valid_token = app.auth_service.get_or_refresh_access_token(app.config.store_access_token)
     if existing_valid_token:
         stdout.write("Already authenticated!\n")
         return existing_valid_token
