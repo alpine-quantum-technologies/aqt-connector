@@ -65,13 +65,23 @@ jobs:
           path: junit/test-results-${{ matrix.python-version }}-${{ matrix.os }}.xml
         if: ${{ always() }}
 
+  integration_test:
+    name: integration-test
+
+    runs-on: ubuntu-latest
+
+    needs: test
+
+    if: ${{ needs.test.result == 'success' && github.ref == 'refs/heads/main' }}
+    
+    steps:
       - name: Check for changes requiring integration testing
         id: changed-files
         uses: tj-actions/changed-files@v45
         with:
           files: |
-            aqt_connector/infrastructure/**
-            tests/integration/**
+              aqt_connector/_infrastructure/**
+              tests/integration/**
 
       - name: Run integration tests upon changes
         if: steps.changed-files.outputs.any_changed == 'true'
@@ -86,10 +96,9 @@ jobs:
           AUTH0_TEST_DEVICE_FLOW_USER_PASSWORD: ${{ secrets.AUTH0_TEST_DEVICE_FLOW_USER_PASSWORD }}
 
   build:
-    needs: test
-
+    needs: [test, integration_test]
     runs-on: ubuntu-latest
-
+    if: ${{ needs.integration_test.result == 'success' || needs.integration_test.result == 'skipped' }}
     steps:
       - uses: actions/checkout@v4
 
