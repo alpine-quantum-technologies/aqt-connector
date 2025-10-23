@@ -30,7 +30,7 @@ def log_in(
             (app.config.client_id, app.config.client_secret)
         )
     else:
-        access_token = app.oidc_service.authenticate_device()
+        access_token, _ = app.oidc_service.authenticate_device()
 
     if app.config.store_access_token:
         app.auth_service.save_access_token(access_token)

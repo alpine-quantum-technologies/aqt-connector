@@ -100,6 +100,7 @@ class StdoutSpy(StringIO):
 
 
 def test_it_displays_the_verification_uri_and_user_code() -> None:
+    """It should display the verification URI and user code."""
     auth_adapter = AuthAdapterSpyAlwaysAuthenticatesImmediately()
     context = OIDCService(
         auth_adapter,
@@ -114,6 +115,7 @@ def test_it_displays_the_verification_uri_and_user_code() -> None:
 
 
 def test_it_displays_a_qr_code_for_the_verification_uri() -> None:
+    """It should display a QR code for the verification URI."""
     auth_adapter = AuthAdapterSpyAlwaysAuthenticatesImmediately()
     context = OIDCService(
         auth_adapter,
@@ -157,18 +159,21 @@ def test_it_displays_a_qr_code_for_the_verification_uri() -> None:
 
 
 def test_it_polls_the_token_endpoint_until_id_token_available() -> None:
+    """It should poll the token endpoint until the adapter returns OfflineAccessTokens."""
     auth_adapter = AuthAdapterPollingSpy()
     context = OIDCService(
         auth_adapter,
         AccessTokenVerifierAlwaysVerifies(),
     )
 
-    retrieved_token = context.authenticate_device()
+    retrieved_tokens = context.authenticate_device()
 
-    assert retrieved_token == auth_adapter.access_token
+    assert retrieved_tokens.access_token == auth_adapter.access_token
+    assert retrieved_tokens.refresh_token == auth_adapter.refresh_token
 
 
 def test_it_raises_error_when_id_token_invalid() -> None:
+    """It should raise TokenValidationError when the adapter returns a tuple but the access token is invalid."""
     context = OIDCService(
         AuthAdapterSpyAlwaysAuthenticatesImmediately(),
         AccessTokenVerifierAlwaysRejects(),
@@ -179,10 +184,62 @@ def test_it_raises_error_when_id_token_invalid() -> None:
 
 
 def test_it_raises_error_when_authentication_fails() -> None:
+    """It should raise AuthenticationError when the adapter fails to authenticate."""
     context = OIDCService(
         AuthAdapterNeverAuthenticates(),
         AccessTokenVerifierAlwaysVerifies(),
     )
 
     with pytest.raises(AuthenticationError):
+        context.authenticate_device()
+
+
+def test_it_returns_tuple_when_adapter_returns_tokens() -> None:
+    """It should return OfflineAccessTokens when the adapter returns OfflineAccessTokens."""
+
+    class AuthAdapterReturnsTuple(Auth0Adapter):
+        def __init__(self) -> None:
+            self.returned = OfflineAccessTokens(access_token="id-token-xyz", refresh_token="refresh-token-xyz")
+
+        def fetch_token_with_device_code(self, device_code: str):
+            return self.returned
+
+        def fetch_device_code(self) -> DeviceCodeData:
+            return DeviceCodeData(
+                verification_uri_complete="https://arnica.aqt.eu/api",
+                user_code="BLTT_HPNS",
+                device_code="abcde12345",
+                interval=0.1,
+            )
+
+    adapter = AuthAdapterReturnsTuple()
+    context = OIDCService(adapter, AccessTokenVerifierAlwaysVerifies())
+
+    tokens = context.authenticate_device()
+
+    assert tokens == OfflineAccessTokens(access_token="id-token-xyz", refresh_token="refresh-token-xyz")
+
+
+def test_it_raises_token_validation_error_when_access_token_invalid() -> None:
+    """It should raise TokenValidationError when the adapter returns a tuple but the access token is invalid."""
+
+    class AuthAdapterReturnsTuple(Auth0Adapter):
+        def __init__(self) -> None:
+            self.returned = OfflineAccessTokens(access_token="id-token-xyz", refresh_token="refresh-token-xyz")
+
+        def fetch_token_with_device_code(self, device_code: str):
+            return self.returned
+
+        def fetch_device_code(self) -> DeviceCodeData:
+            return DeviceCodeData(
+                verification_uri_complete="https://arnica.aqt.eu/api",
+                user_code="BLTT_HPNS",
+                device_code="abcde12345",
+                interval=0.1,
+            )
+
+    adapter = AuthAdapterReturnsTuple()
+    context = OIDCService(adapter, AccessTokenVerifierAlwaysRejects())
+
+    with pytest.raises(TokenValidationError):
         context.authenticate_device()

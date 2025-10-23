@@ -4,6 +4,7 @@ from typing import Optional, TextIO, Union
 import pytest
 
 from aqt_connector import ArnicaApp, ArnicaConfig, log_in
+from aqt_connector._data_types import OfflineAccessTokens
 from aqt_connector._domain.auth_service import AuthService
 from aqt_connector._domain.oidc_service import OIDCService
 
@@ -12,14 +13,15 @@ class OIDCContextAlwaysAuthenticates(OIDCService):
     def __init__(self) -> None:
         self.client_access_token = "this-is-the-client-token"
         self.device_access_token = "this-is-the-device-token"
+        self.refresh_token = "this-is-the-refresh-token"
         self.used_credentials: Optional[tuple[str, str]] = None
 
     def authenticate_with_client_credentials(self, client_credentials) -> str:
         self.used_credentials = client_credentials
         return self.client_access_token
 
-    def authenticate_device(self, *, out: TextIO = sys.stdout) -> str:
-        return self.device_access_token
+    def authenticate_device(self, *, out: TextIO = sys.stdout) -> OfflineAccessTokens:
+        return OfflineAccessTokens(access_token=self.device_access_token, refresh_token=self.refresh_token)
 
 
 class AuthenticatedAuthContext(AuthService):
