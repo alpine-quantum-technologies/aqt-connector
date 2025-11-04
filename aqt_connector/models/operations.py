@@ -7,7 +7,8 @@ from typing import (
     Any,
     Final,
     Literal,
-    Union,
+    TypeAlias,
+    TypeGuard,
     final,
 )
 
@@ -20,7 +21,6 @@ from pydantic import (
     field_validator,
 )
 from pydantic.types import NonNegativeInt, conint
-from typing_extensions import TypeAlias, TypeGuard
 
 if TYPE_CHECKING:
     Bit = int
@@ -126,6 +126,18 @@ class GateR(SingleQubitGate):
         \frac{1}{\sqrt{2}}\left (\ket{0_j} + \ket{1_j} \right )
         \end{align*}
         $$
+
+    **Warning:**
+
+    Small $\theta$ values cannot be implemented natively by the AQT backends.
+    Such instances are thus rewritten as:
+
+    $$
+    R(\theta,\,\phi)\to R(\pi,\,\pi)\cdot R(\theta+\pi,\,\phi)
+    $$
+
+    The condition triggering this transformation is an implementation detail,
+    typically $\theta \leq \pi/5$.
     """
 
     def __init__(self, **data: Any) -> None:
@@ -222,8 +234,8 @@ class Measure(AbstractOperation):
     operation: Literal["MEASURE"]
 
 
-Gate: TypeAlias = Union[GateRZ, GateR, GateRXX]
-Operation: TypeAlias = Union[Gate, Measure]
+Gate: TypeAlias = GateRZ | GateR | GateRXX
+Operation: TypeAlias = Gate | Measure
 
 
 class OperationModel(RootModel[Operation]):
