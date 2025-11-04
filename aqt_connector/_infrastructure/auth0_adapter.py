@@ -12,7 +12,7 @@ class Auth0Adapter:
     """Provides authentication with Auth0.
 
     Attributes:
-        domain (str): the domain of the auth provider.
+        tenant_url (str): the URL of the auth provider tenant.
         device_client_id (str): the device client ID for the application.
         audience (str): the audience for the application.
     """
@@ -23,7 +23,7 @@ class Auth0Adapter:
         Args:
             config (AuthenticationConfig): configuration for the Auth0 tenant.
         """
-        self.domain = config.issuer
+        self.tenant_url = config.issuer
         self.device_client_id = config.device_client_id
         self.audience = config.audience
         self._http_client = httpx.Client()
@@ -47,7 +47,9 @@ class Auth0Adapter:
             "audience": self.audience,
             "grant_type": "client_credentials",
         }
-        token_response = self._http_client.post(urllib.parse.urljoin(self.domain, "/oauth/token"), json=token_payload)
+        token_response = self._http_client.post(
+            urllib.parse.urljoin(self.tenant_url, "/oauth/token"), json=token_payload
+        )
         token_data = token_response.json()
         if token_response.status_code == 200:
             return token_data["access_token"]
@@ -74,7 +76,9 @@ class Auth0Adapter:
             "device_code": device_code,
             "client_id": self.device_client_id,
         }
-        token_response = self._http_client.post(urllib.parse.urljoin(self.domain, "/oauth/token"), data=token_payload)
+        token_response = self._http_client.post(
+            urllib.parse.urljoin(self.tenant_url, "/oauth/token"), data=token_payload
+        )
         token_data = token_response.json()
 
         if token_response.status_code == 200:
@@ -106,7 +110,7 @@ class Auth0Adapter:
             "scope": "openid profile offline_access",
         }
         device_code_response = self._http_client.post(
-            urllib.parse.urljoin(self.domain, "/oauth/device/code"), data=device_code_payload
+            urllib.parse.urljoin(self.tenant_url, "/oauth/device/code"), data=device_code_payload
         )
         if device_code_response.status_code != 200:
             raise AuthenticationError
@@ -136,7 +140,9 @@ class Auth0Adapter:
             "grant_type": "refresh_token",
             "refresh_token": refresh_token,
         }
-        token_response = self._http_client.post(urllib.parse.urljoin(self.domain, "/oauth/token"), data=token_payload)
+        token_response = self._http_client.post(
+            urllib.parse.urljoin(self.tenant_url, "/oauth/token"), data=token_payload
+        )
         if token_response.status_code != 200:
             error = token_response.json()
             raise AuthenticationError(error.get("error_description", "Failed to refresh token."))

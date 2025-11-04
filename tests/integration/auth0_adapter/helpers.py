@@ -4,10 +4,7 @@ from typing import Final
 import httpx
 from playwright.sync_api import Page, expect
 
-from aqt_connector._data_types import OfflineAccessTokens
-from aqt_connector._infrastructure.auth0_adapter import Auth0Adapter, AuthenticationConfig
-
-TEST_TENANT_DOMAIN: Final = os.getenv("AUTH0_TEST_TENANT_DOMAIN", "")
+TEST_TENANT_URL: Final = os.getenv("AUTH0_TEST_TENANT_URL", "")
 TEST_CLIENT_ID: Final = os.getenv("AUTH0_TEST_DEVICE_FLOW_CLIENT_ID", "")
 TEST_USER_EMAIL: Final = os.getenv("AUTH0_TEST_DEVICE_FLOW_USER_EMAIL", "")
 TEST_USER_PASSWORD: Final = os.getenv("AUTH0_TEST_DEVICE_FLOW_USER_PASSWORD", "")
@@ -20,7 +17,7 @@ def start_device_code_flow() -> tuple[str, str, str]:
         tuple[str, str, str]: A tuple containing the verification URI, user code, and device code.
     """
     response = httpx.post(
-        f"{TEST_TENANT_DOMAIN}/oauth/device/code",
+        f"{TEST_TENANT_URL}/oauth/device/code",
         data={
             "client_id": TEST_CLIENT_ID,
             "scope": "openid profile offline_access",
@@ -30,15 +27,12 @@ def start_device_code_flow() -> tuple[str, str, str]:
     return (data["verification_uri_complete"], data["user_code"], data["device_code"])
 
 
-def authenticate_with_device_code(page: Page, device_code_data: tuple[str, str, str]) -> OfflineAccessTokens:
-    """Authenticates with a device code.
+def log_in_device_flow(page: Page, device_code_data: tuple[str, str, str]) -> None:
+    """Logs in to the device code flow using the provided Playwright page.
 
     Args:
         page (Page): The Playwright page to use for authentication.
         device_code_data (tuple[str, str, str]): A tuple containing the verification URI, user code, and device code.
-
-    Returns:
-        OfflineAccessTokens: The offline access tokens obtained after authentication.
     """
     (verification_uri, user_code, device_code) = device_code_data
     page.goto(verification_uri)
@@ -48,10 +42,3 @@ def authenticate_with_device_code(page: Page, device_code_data: tuple[str, str, 
     page.get_by_role("textbox", name="password").fill(TEST_USER_PASSWORD)
     page.get_by_role("button", name="continue").click()
     expect(page.get_by_role("heading", name="Congratulations, you're all set!")).to_be_visible()
-
-    config = AuthenticationConfig(issuer=TEST_TENANT_DOMAIN, device_client_id=TEST_CLIENT_ID)
-    auth_adapter = Auth0Adapter(config)
-    tokens = auth_adapter.fetch_token_with_device_code(device_code)
-
-    assert tokens is not None
-    return tokens

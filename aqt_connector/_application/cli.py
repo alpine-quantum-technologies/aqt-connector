@@ -17,8 +17,7 @@ def log_in_command(
     client_secret: Annotated[Optional[str], typer.Option(help="Client secret")] = None,
     arnica_url: Annotated[Optional[str], typer.Option(help="The URL of the Arnica API")] = None,
 ):
-    config = ArnicaConfig()
-    config.app_dir = Path(typer.get_app_dir(APP_NAME))
+    config = ArnicaConfig(Path(typer.get_app_dir(APP_NAME)))
     if arnica_url:
         config.arnica_url = arnica_url
     if client_id:

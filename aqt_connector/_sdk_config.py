@@ -7,6 +7,8 @@ from typing import Union
 
 import tomli
 
+DEFAULT_APP_DIR = Path.home() / ".aqt"
+
 
 @dataclass
 class AuthenticationConfig:
@@ -20,8 +22,6 @@ class ArnicaConfig:
     """Configuration for the SDK.
 
     Attributes:
-        app_dir (Path): the directory where the application will store its config and
-            cache files. Defaults to `Path.home() / .aqt`.
         arnica_url (str): the base URL of the Arnica API. Defaults to "https://arnica.aqt.eu/api".
         client_id (str | None): the ID to use for authentication with client credentials. Defaults to None.
         client_secret (str | None): the secret to use for authentication with client credentials. Defaults to None.
@@ -29,9 +29,14 @@ class ArnicaConfig:
         oidc_config (AuthenticationConfig): configuration for the OIDC provider.
     """
 
-    def __init__(self) -> None:
-        """Initializes the configuration."""
-        self.app_dir = Path.home() / ".aqt"
+    def __init__(self, app_dir=DEFAULT_APP_DIR) -> None:
+        """Initializes the configuration.
+
+        Args:
+            app_dir (Path): the directory where the application will store its config and cache files. Defaults to
+                `Path.home() / .aqt`.
+        """
+        self._app_dir = app_dir
         self.arnica_url = "https://arnica.aqt.eu/api"
         self.client_id: Union[str, None] = None
         self.client_secret: Union[str, None] = None
@@ -43,7 +48,7 @@ class ArnicaConfig:
     def _read_config(self) -> None:
         """Reads config from the host system."""
         config: dict[str, str] = {}
-        config = self._add_file_config(config, self.app_dir / "config")
+        config = self._add_file_config(config, self._app_dir / "config")
         config = self._add_env_config(config)
 
         self.arnica_url = config.get("arnica_url", "https://arnica.aqt.eu/api")
