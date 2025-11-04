@@ -120,7 +120,7 @@ store_access_token = true
 Notes:
 
 - store_access_token=true will persist the obtained token to {app_dir}/access_token
-- To disable persistence, set store_access_token=false in this file (recommended)
+- To disable persistence, set store_access_token=false in this file
 
 ### Environment variables
 
