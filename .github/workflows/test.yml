@@ -65,19 +65,29 @@ jobs:
           path: junit/test-results-${{ matrix.python-version }}-${{ matrix.os }}.xml
         if: ${{ always() }}
 
+  integration_test:
+    name: integration-test
+
+    runs-on: ubuntu-latest
+
+    needs: test
+
+    if: ${{ needs.test.result == 'success' && github.ref == 'refs/heads/main' }}
+    
+    steps:
       - name: Check for changes requiring integration testing
         id: changed-files
         uses: tj-actions/changed-files@v45
         with:
           files: |
-            aqt_connector/infrastructure/**
-            tests/integration/**
+              aqt_connector/_infrastructure/**
+              tests/integration/**
 
       - name: Run integration tests upon changes
         if: steps.changed-files.outputs.any_changed == 'true'
         run: uvx playwright install && uv run pytest ./tests/integration/ 
         env: 
-          AUTH0_TEST_TENANT_DOMAIN: ${{ secrets.AUTH0_TEST_TENANT_DOMAIN }}
+          AUTH0_TEST_TENANT_URL: ${{ secrets.AUTH0_TEST_TENANT_URL }}
           AUTH0_TEST_DEVICE_FLOW_CLIENT_ID: ${{ secrets.AUTH0_TEST_DEVICE_FLOW_CLIENT_ID }}
           AUTH0_TEST_CLIENT_CREDENTIALS_CLIENT_ID: ${{ secrets.AUTH0_TEST_CLIENT_CREDENTIALS_CLIENT_ID }}
           AUTH0_TEST_CLIENT_CREDENTIALS_CLIENT_SECRET: ${{ secrets.AUTH0_TEST_CLIENT_CREDENTIALS_CLIENT_SECRET }}
@@ -86,10 +96,9 @@ jobs:
           AUTH0_TEST_DEVICE_FLOW_USER_PASSWORD: ${{ secrets.AUTH0_TEST_DEVICE_FLOW_USER_PASSWORD }}
 
   build:
-    needs: test
-
+    needs: [test, integration_test]
     runs-on: ubuntu-latest
-
+    if: ${{ needs.integration_test.result == 'success' || needs.integration_test.result == 'skipped' }}
     steps:
       - uses: actions/checkout@v4
 

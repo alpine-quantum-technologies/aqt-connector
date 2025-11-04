@@ -9,7 +9,7 @@ import pytest
 from aqt_connector._infrastructure.access_token_verifier import AccessTokenVerifier, AccessTokenVerifierConfig
 from aqt_connector.exceptions import TokenValidationError
 
-TEST_TENANT_DOMAIN: Final = os.getenv("AUTH0_TEST_TENANT_DOMAIN", "")
+TEST_TENANT_URL: Final = os.getenv("AUTH0_TEST_TENANT_URL", "")
 TEST_AUDIENCE: Final = os.getenv("AUTH0_TEST_CLIENT_CREDENTIALS_AUDIENCE", "")
 TEST_CLIENT_ID: Final = os.getenv("AUTH0_TEST_CLIENT_CREDENTIALS_CLIENT_ID", "")
 TEST_CLIENT_SECRET: Final = os.getenv("AUTH0_TEST_CLIENT_CREDENTIALS_CLIENT_SECRET", "")
@@ -23,15 +23,15 @@ def access_token() -> str:
         "audience": TEST_AUDIENCE,
         "grant_type": "client_credentials",
     }
-    token_response = httpx.post(f"https://{TEST_TENANT_DOMAIN}/oauth/token", json=token_payload).raise_for_status()
+    token_response = httpx.post(f"{TEST_TENANT_URL}/oauth/token", json=token_payload).raise_for_status()
     token_data = token_response.json()
     return token_data["access_token"]
 
 
 def test_it_verifies_the_access_token_if_token_has_any_allowed_audience(access_token: str) -> None:
     config = AccessTokenVerifierConfig(
-        f"https://{TEST_TENANT_DOMAIN}/.well-known/jwks.json",
-        f"https://{TEST_TENANT_DOMAIN}/",
+        f"{TEST_TENANT_URL}/.well-known/jwks.json",
+        f"{TEST_TENANT_URL}/",
         allowed_audiences=[TEST_AUDIENCE],
     )
 
@@ -43,7 +43,7 @@ def test_it_verifies_the_access_token_if_token_has_any_allowed_audience(access_t
 def test_it_rejects_invalid_token(access_token: str) -> None:
     config = AccessTokenVerifierConfig(
         "https://arnica-testing.eu.auth0.com/.well-known/jwks.json",
-        f"{TEST_TENANT_DOMAIN}/",
+        f"{TEST_TENANT_URL}/",
         allowed_audiences=[TEST_AUDIENCE],
     )
 
@@ -62,8 +62,8 @@ def test_it_rejects_invalid_token(access_token: str) -> None:
 
 def test_it_rejects_token_if_jwks_invalid(access_token: str) -> None:
     config = AccessTokenVerifierConfig(
-        f"https://{TEST_TENANT_DOMAIN}/.well-known/openid-configuration",
-        f"{TEST_TENANT_DOMAIN}/",
+        f"{TEST_TENANT_URL}/.well-known/openid-configuration",
+        f"{TEST_TENANT_URL}/",
         allowed_audiences=[TEST_AUDIENCE],
     )
 
@@ -76,7 +76,7 @@ def test_it_rejects_token_if_jwks_invalid(access_token: str) -> None:
 def test_it_rejects_token_if_key_not_in_jwks(access_token: str) -> None:
     config = AccessTokenVerifierConfig(
         "https://arnica.eu.auth0.com/.well-known/jwks.json",
-        f"{TEST_TENANT_DOMAIN}/",
+        f"{TEST_TENANT_URL}/",
         allowed_audiences=[TEST_AUDIENCE],
     )
 
@@ -88,8 +88,8 @@ def test_it_rejects_token_if_key_not_in_jwks(access_token: str) -> None:
 
 def test_it_rejects_token_with_no_allowed_audience(access_token: str) -> None:
     config = AccessTokenVerifierConfig(
-        f"https://{TEST_TENANT_DOMAIN}/.well-known/jwks.json",
-        f"{TEST_TENANT_DOMAIN}/",
+        f"{TEST_TENANT_URL}/.well-known/jwks.json",
+        f"{TEST_TENANT_URL}/",
         allowed_audiences=["https://arnica.aqt.eu/api"],
     )
 
@@ -101,7 +101,7 @@ def test_it_rejects_token_with_no_allowed_audience(access_token: str) -> None:
 
 def test_it_rejects_token_from_incorrect_issuer(access_token: str) -> None:
     config = AccessTokenVerifierConfig(
-        f"https://{TEST_TENANT_DOMAIN}/.well-known/jwks.json",
+        f"{TEST_TENANT_URL}/.well-known/jwks.json",
         "https://arnica.eu.auth0.com",
         allowed_audiences=[TEST_AUDIENCE],
     )
