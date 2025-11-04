@@ -140,27 +140,17 @@ class Characterisation(BaseModel):
 
     # Setting the description for the OpenAPI docs explicitly.
     model_config = ConfigDict(
-        json_schema_extra={
-            "description": "Characterisation data describing a resources properties."
-        }
+        json_schema_extra={"description": "Characterisation data describing a resources properties."}
     )
 
-    single_qubit_gate_fidelity: Annotated[
-        dict[str, GateFidelity], AfterValidator(keys_are_contiguous)
-    ] = Field(..., description=single_qubit_gate_fidelity_description)
-    mean_two_qubit_gate_fidelity: GateFidelity = Field(
-        ..., description=mean_two_qubit_gate_fidelity_description
+    single_qubit_gate_fidelity: Annotated[dict[str, GateFidelity], AfterValidator(keys_are_contiguous)] = Field(
+        ..., description=single_qubit_gate_fidelity_description
     )
-    spam_fidelity_lower_bound: float = Field(
-        ..., ge=0, le=100, description=spam_fidelity_description
-    )
+    mean_two_qubit_gate_fidelity: GateFidelity = Field(..., description=mean_two_qubit_gate_fidelity_description)
+    spam_fidelity_lower_bound: float = Field(..., ge=0, le=100, description=spam_fidelity_description)
     t2_coherence_time_s: PositiveFloatValueWithUncertainty = Field(..., description=t2_description)
     t1_s: PositiveFloatValueWithUncertainty = Field(..., description=t1_description)
     readout_time_micros: float = Field(ge=0, description=readout_time_description)
-    single_qubit_gate_duration_micros: float = Field(
-        ge=0, description=single_qubit_gate_duration_description
-    )
-    two_qubit_gate_duration_micros: float = Field(
-        ge=0, description=two_qubit_gate_duration_description
-    )
+    single_qubit_gate_duration_micros: float = Field(ge=0, description=single_qubit_gate_duration_description)
+    two_qubit_gate_duration_micros: float = Field(ge=0, description=two_qubit_gate_duration_description)
     updated_at: datetime = Field(..., description="Timestamp when this was last updated")

@@ -76,9 +76,7 @@ class RRCancelled(BaseResponse):
 class BasicJobMetadata(BaseModel):
     """Metadata for a user-submitted job."""
 
-    job_id: uuid.UUID = Field(
-        description="Id that uniquely identifies the job. This is used to request results."
-    )
+    job_id: uuid.UUID = Field(description="Id that uniquely identifies the job. This is used to request results.")
     job_type: Literal[JobType.QUANTUM_CIRCUIT] = JobType.QUANTUM_CIRCUIT
     label: str | None = None
     resource_id: str
