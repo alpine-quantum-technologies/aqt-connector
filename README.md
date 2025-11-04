@@ -107,7 +107,7 @@ app_dir defaults to:
 
 ### Config file (TOML)
 
-Create a file named config in the app_dir. TOML dotted keys or tables are supported. Example:
+Create a file named config in the app_dir or a custom location which you then pass to the ArnicaConfig (`config = ArnicaConfig("~/myconfig")`). TOML dotted keys or tables are supported. Example:
 
 ```toml
 [default]
