@@ -40,34 +40,34 @@ class BaseResponse(BaseModel):
     timing_data: list[StatusChange] | None = None
 
 
-class RRQueued(BaseResponse):
+class RRQueued(BaseResponse):  # type: ignore[override, unused-ignore]
     """Metadata for a queued job."""
 
     status: Literal[JobStatus.QUEUED] = JobStatus.QUEUED
 
 
-class RROngoing(BaseResponse):
+class RROngoing(BaseResponse):  # type: ignore[override, unused-ignore]
     """Metadata for an ongoing job."""
 
     status: Literal[JobStatus.ONGOING] = JobStatus.ONGOING
     finished_count: int = Field(ge=0)
 
 
-class RRFinished(BaseResponse):
+class RRFinished(BaseResponse):  # type: ignore[override, unused-ignore]
     """Metadata for a finished job."""
 
     status: Literal[JobStatus.FINISHED] = JobStatus.FINISHED
     result: dict[int, list[list[Bit]]]
 
 
-class RRError(BaseResponse):
+class RRError(BaseResponse):  # type: ignore[override, unused-ignore]
     """Metadata for a failed job."""
 
     status: Literal[JobStatus.ERROR] = JobStatus.ERROR
     message: str
 
 
-class RRCancelled(BaseResponse):
+class RRCancelled(BaseResponse):  # type: ignore[override, unused-ignore]
     """Metadata for a cancelled job."""
 
     status: Literal[JobStatus.CANCELLED] = JobStatus.CANCELLED
