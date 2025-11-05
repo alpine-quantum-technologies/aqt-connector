@@ -8,14 +8,14 @@ from pydantic import BaseModel, Field
 
 from aqt_connector.arnica_api_schemas import BaseSchema
 from aqt_connector.models.circuits import QuantumCircuit
-from aqt_connector.models.jobs import JobStatusPublic, JobType
+from aqt_connector.models.jobs import JobStatus, JobType
 from aqt_connector.models.operations import Bit
 
 
 class StatusChange(BaseModel):
     """Schema for a job status change."""
 
-    new_status: JobStatusPublic
+    new_status: JobStatus
     timestamp: datetime
 
 
@@ -36,41 +36,41 @@ class QuantumCircuits(BaseModel):
 class BaseResponse(BaseModel):
     """Base schema for job result metadata."""
 
-    status: JobStatusPublic
+    status: JobStatus
     timing_data: list[StatusChange] | None = None
 
 
 class RRQueued(BaseResponse):
     """Metadata for a queued job."""
 
-    status: Literal[JobStatusPublic.QUEUED] = JobStatusPublic.QUEUED
+    status: Literal[JobStatus.QUEUED] = JobStatus.QUEUED
 
 
 class RROngoing(BaseResponse):
     """Metadata for an ongoing job."""
 
-    status: Literal[JobStatusPublic.ONGOING] = JobStatusPublic.ONGOING
+    status: Literal[JobStatus.ONGOING] = JobStatus.ONGOING
     finished_count: int = Field(ge=0)
 
 
 class RRFinished(BaseResponse):
     """Metadata for a finished job."""
 
-    status: Literal[JobStatusPublic.FINISHED] = JobStatusPublic.FINISHED
+    status: Literal[JobStatus.FINISHED] = JobStatus.FINISHED
     result: dict[int, list[list[Bit]]]
 
 
 class RRError(BaseResponse):
     """Metadata for a failed job."""
 
-    status: Literal[JobStatusPublic.ERROR] = JobStatusPublic.ERROR
+    status: Literal[JobStatus.ERROR] = JobStatus.ERROR
     message: str
 
 
 class RRCancelled(BaseResponse):
     """Metadata for a cancelled job."""
 
-    status: Literal[JobStatusPublic.CANCELLED] = JobStatusPublic.CANCELLED
+    status: Literal[JobStatus.CANCELLED] = JobStatus.CANCELLED
 
 
 class BasicJobMetadata(BaseModel):
