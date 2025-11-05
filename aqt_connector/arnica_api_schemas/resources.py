@@ -1,6 +1,7 @@
 """Resource schemas for the ARNICA API."""
 
 from datetime import datetime
+from typing import Union
 
 from aqt_connector.arnica_api_schemas import BaseSchema
 from aqt_connector.models.resources import (
@@ -19,7 +20,7 @@ class ResourceDetails(BaseSchema):
     status: ResourceStatus
     available_qubits: int
     status_updated_at: datetime
-    characterisation: Characterisation | None = None
+    characterisation: Union[Characterisation, None] = None
 
 
 class WorkspaceResource(BaseSchema):
