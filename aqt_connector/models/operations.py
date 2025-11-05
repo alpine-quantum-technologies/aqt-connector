@@ -54,7 +54,7 @@ class SingleQubitGate(AbstractGate):
 
 
 class GateRZ(SingleQubitGate):
-    r"""### A single-qubit rotation rotation around the Bloch sphere's z-axis.
+    r"""### A single-qubit rotation around the Bloch sphere's z-axis.
 
     The Rz-gate on qubit j with pulse area θ in units of π is defined as
         $$
