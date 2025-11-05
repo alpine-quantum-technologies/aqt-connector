@@ -2,7 +2,7 @@
 
 import uuid
 from datetime import datetime
-from typing import Literal
+from typing import Literal, Union
 
 from pydantic import BaseModel, Field
 
@@ -23,7 +23,7 @@ class SubmitJobRequest(BaseSchema):
     """Request body schema for the submit job endpoint."""
 
     job_type: Literal[JobType.QUANTUM_CIRCUIT] = JobType.QUANTUM_CIRCUIT
-    label: str | None = None
+    label: Union[str, None] = None
     payload: "QuantumCircuits"
 
 
@@ -37,7 +37,7 @@ class BaseResponse(BaseModel):
     """Base schema for job result metadata."""
 
     status: JobStatus
-    timing_data: list[StatusChange] | None = None
+    timing_data: Union[list[StatusChange], None] = None
 
 
 class RRQueued(BaseResponse):  # type: ignore[override, unused-ignore]
@@ -78,7 +78,7 @@ class BasicJobMetadata(BaseModel):
 
     job_id: uuid.UUID = Field(description="Id that uniquely identifies the job. This is used to request results.")
     job_type: Literal[JobType.QUANTUM_CIRCUIT] = JobType.QUANTUM_CIRCUIT
-    label: str | None = None
+    label: Union[str, None] = None
     resource_id: str
     workspace_id: str
 
@@ -94,4 +94,4 @@ class ResultResponse(BaseSchema):
     """Response body schema for the request result endpoint."""
 
     job: BasicJobMetadata
-    response: RRQueued | RROngoing | RRFinished | RRError | RRCancelled
+    response: Union[RRQueued, RROngoing, RRFinished, RRError, RRCancelled]
