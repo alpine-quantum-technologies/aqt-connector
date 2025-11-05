@@ -1,20 +1,21 @@
 """ARNICA resource models."""
 
 from datetime import datetime
-from enum import StrEnum
-from typing import Annotated, Self
+from enum import Enum
+from typing import Annotated
 
 from pydantic import AfterValidator, BaseModel, ConfigDict, Field, model_validator
+from typing_extensions import Self
 
 
-class ResourceType(StrEnum):
+class ResourceType(Enum):
     """Type of an ARNICA quantum resource."""
 
     SIMULATOR = "simulator"
     DEVICE = "device"
 
 
-class ResourceStatus(StrEnum):
+class ResourceStatus(Enum):
     """Status of an ARNICA quantum resource."""
 
     ONLINE = "online"

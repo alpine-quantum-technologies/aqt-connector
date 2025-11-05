@@ -1,8 +1,8 @@
-from enum import StrEnum
+from enum import Enum
 
 
-class JobStatusPublic(StrEnum):
-    """Status of a job for the public API."""
+class JobStatus(Enum):
+    """Status of a job."""
 
     CANCELLED = "cancelled"
     ERROR = "error"
@@ -11,7 +11,7 @@ class JobStatusPublic(StrEnum):
     QUEUED = "queued"
 
 
-class JobType(StrEnum):
+class JobType(Enum):
     """Possible Arnica job types."""
 
     QUANTUM_CIRCUIT = "quantum_circuit"
