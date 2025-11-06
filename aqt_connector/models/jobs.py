@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class JobStatus(Enum):
+class JobStatus(str, Enum):
     """Status of a job."""
 
     CANCELLED = "cancelled"
@@ -11,7 +11,7 @@ class JobStatus(Enum):
     QUEUED = "queued"
 
 
-class JobType(Enum):
+class JobType(str, Enum):
     """Possible Arnica job types."""
 
     QUANTUM_CIRCUIT = "quantum_circuit"

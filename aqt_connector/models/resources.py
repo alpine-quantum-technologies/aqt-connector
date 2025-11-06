@@ -8,14 +8,14 @@ from pydantic import AfterValidator, BaseModel, ConfigDict, Field, model_validat
 from typing_extensions import Self
 
 
-class ResourceType(Enum):
+class ResourceType(str, Enum):
     """Type of an ARNICA quantum resource."""
 
     SIMULATOR = "simulator"
     DEVICE = "device"
 
 
-class ResourceStatus(Enum):
+class ResourceStatus(str, Enum):
     """Status of an ARNICA quantum resource."""
 
     ONLINE = "online"
