@@ -1,4 +1,4 @@
-"""ARNICA Quantum Operation Models."""
+"""AQT-connector models for quantum operations."""
 
 from abc import ABC, abstractmethod
 from math import inf
@@ -92,9 +92,6 @@ class GateRXX(AbstractGate):
         data["operation"] = "RXX"
         super().__init__(**data)
 
-    # constraint unique_items does not work for Tuple
-    # We are using a custom validator, but the constraint is not part of
-    # the OpenApi spec.
     qubits: list[NonNegativeInt] = Field(min_length=2, max_length=2)
     theta: float = Field(ge=0.0, le=0.5)
     operation: Literal["RXX"]
@@ -102,6 +99,7 @@ class GateRXX(AbstractGate):
     @field_validator("qubits")
     @classmethod
     def validate_qubits_unique(cls, v: list[NonNegativeInt]) -> list[NonNegativeInt]:
+        """Constraint unique_items does not work for Tuple, therefore we are using a custom validator."""
         if v[0] == v[1]:
             raise ValidationError("addressed qubits must be unique")
         return v

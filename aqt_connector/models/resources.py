@@ -1,27 +1,10 @@
-"""ARNICA resource models."""
+"""AQT-connector models for resources."""
 
 from datetime import datetime
-from enum import Enum
 from typing import Annotated
 
 from pydantic import AfterValidator, BaseModel, Field, model_validator
 from typing_extensions import Self
-
-
-class ResourceType(str, Enum):
-    """Type of an ARNICA quantum resource."""
-
-    SIMULATOR = "simulator"
-    DEVICE = "device"
-
-
-class ResourceStatus(str, Enum):
-    """Status of an ARNICA quantum resource."""
-
-    ONLINE = "online"
-    UNAVAILABLE = "unavailable"
-    MAINTENANCE = "maintenance"
-    OFFLINE = "offline"
 
 
 class GateFidelity(BaseModel):
