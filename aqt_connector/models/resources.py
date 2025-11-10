@@ -52,6 +52,7 @@ class PositiveFloatValueWithUncertainty(BaseModel):
     value: float = Field(gt=0)
     uncertainty: float = Field(ge=0)
 
+
 class Characterisation(BaseModel):
     """Characterisation data describing a resources properties.
 
@@ -71,7 +72,7 @@ class Characterisation(BaseModel):
 
     single_qubit_gate_fidelity: Annotated[dict[str, GateFidelity], AfterValidator(keys_are_contiguous)]
     mean_two_qubit_gate_fidelity: GateFidelity
-    spam_fidelity_lower_bound: float = Field(..., ge=0, le=100, )
+    spam_fidelity_lower_bound: float = Field(..., ge=0, le=100)
     t2_coherence_time_s: PositiveFloatValueWithUncertainty
     t1_s: PositiveFloatValueWithUncertainty
     readout_time_micros: float = Field(ge=0)
