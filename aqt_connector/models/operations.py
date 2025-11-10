@@ -56,32 +56,7 @@ class SingleQubitGate(AbstractGate):
 class GateRZ(SingleQubitGate):
     r"""### A single-qubit rotation around the Bloch sphere's z-axis.
 
-    The Rz-gate on qubit j with pulse area θ in units of π is defined as
-        $$
-        U_{\mathrm{R_z}}^j(\theta) =
-        \exp\left( -\mathrm{i} \theta \frac{\pi}{2} \sigma_z^j \right) =
-        \begin{pmatrix}
-        \cos(\theta \frac{\pi}{2}) -\mathrm{i}\sin(\theta \frac{\pi}{2}) && 0 \\
-        0 && \cos(\theta \frac{\pi}{2}) +\mathrm{i}\sin(\theta \frac{\pi}{2})
-        \end{pmatrix}
-        $$
-    with the Pauli matrix
-        $$
-        \sigma_z =
-        \begin{pmatrix}
-        1 & 0 \\ 0 & -1
-        \end{pmatrix}.
-        $$
-
-    **Examples:**
-        $$
-        \begin{align*}
-        U_{\mathrm{R_z}}^j(1)\frac{1}{\sqrt{2}}\left( \ket{0_j} + \ket{1_j}\right) &=
-        \frac{1}{\sqrt{2}}\left (\ket{0_j} - \ket{1_j} \right ) \\
-        U_{\mathrm{R_z}}^j(0.5)\frac{1}{\sqrt{2}}\left (\ket{0_j} + \ket{1_j} \right) &=
-        \frac{1}{\sqrt{2}}\left (\ket{0_j} +\mathrm{i}\ket{1_j} \right )
-        \end{align*}
-        $$
+    Details can be found in the description of the GateRZ schema in https://arnica.aqt.eu/api/v1/docs
     """
 
     def __init__(self, **data: Any) -> None:
@@ -95,49 +70,7 @@ class GateRZ(SingleQubitGate):
 class GateR(SingleQubitGate):
     r"""### A single-qubit rotation around an arbitrary axis on the Bloch sphere's equatorial plane.
 
-    The R-gate on qubit j with pulse area θ and mixing angle φ, both in units of π, is defined as
-        $$
-        U_{\mathrm{R}}^j(\theta,\varphi) =
-        \exp\left( -\mathrm{i} \theta \frac{\pi}{2}
-        \left[\sin(\varphi \pi)\sigma_y^j + \cos(\varphi \pi)\sigma_x^j \right] \right) =
-        \begin{pmatrix}
-        \cos(\theta \frac{\pi}{2}) && -\mathrm{i} e^{-\mathrm{i} \varphi \pi}\sin(\theta \frac{\pi}{2})\\
-        -\mathrm{i} e^{\mathrm{i} \varphi \pi}\sin(\theta \frac{\pi}{2}) && \cos(\theta \frac{\pi}{2})
-        \end{pmatrix}
-        $$
-    with the Pauli matrices
-        $$
-        \sigma_x =
-        \begin{pmatrix}
-        0 & 1 \\ 1 & 0
-        \end{pmatrix} ,
-        \sigma_y =
-        \begin{pmatrix}
-        0 & -\mathrm{i} \\ \mathrm{i} & 0
-        \end{pmatrix}.
-        $$
-
-    **Examples:**
-        $$
-        \begin{align*}
-        U_{\mathrm{R}}^j(0.5, 0) \ket{0_j} &=
-        \frac{1}{\sqrt{2}}\left (\ket{0_j} - \mathrm{i}\ket{1_j} \right )\\
-        U_{\mathrm{R}}^j(0.5, 0.5) \ket{0_j} &=
-        \frac{1}{\sqrt{2}}\left (\ket{0_j} + \ket{1_j} \right )
-        \end{align*}
-        $$
-
-    **Warning:**
-
-    Small $\theta$ values cannot be implemented natively by the AQT backends.
-    Such instances are thus rewritten as:
-
-    $$
-    R(\theta,\,\phi)\to R(\pi,\,\pi)\cdot R(\theta+\pi,\,\phi)
-    $$
-
-    The condition triggering this transformation is an implementation detail,
-    typically $\theta \leq \pi/5$.
+    Details can be found in the description of the GateR schema in https://arnica.aqt.eu/api/v1/docs
     """
 
     def __init__(self, **data: Any) -> None:
@@ -152,49 +85,7 @@ class GateR(SingleQubitGate):
 class GateRXX(AbstractGate):
     r"""### A two-qubit entangling gate of Mølmer-Sørensen-type.
 
-    The MS-gate on qubits j and k with pulse area θ in units of π is defined as
-        $$
-        \begin{aligned}
-        U_{\mathrm{MS}}^{j,k} \left (\theta \right) & =
-        e^{\mathrm{i}\theta\frac{\pi}{2}}\exp{\left(-\mathrm{i} \theta \pi {S_x}^2 \right) }
-        = \begin{pmatrix}
-        \cos(\theta \frac{\pi}{2}) & 0 & 0 && -\mathrm{i}\sin(\theta \frac{\pi}{2}) \\
-        0 & \cos(\theta \frac{\pi}{2}) & -\mathrm{i}\sin(\theta \frac{\pi}{2}) && 0 \\
-        0 & -\mathrm{i}\sin(\theta\frac{\pi}{2}) & \cos(\theta \frac{\pi}{2}) && 0 \\
-        -\mathrm{i}\sin(\theta \frac{\pi}{2}) & 0 & 0 && \cos(\theta \frac{\pi}{2})
-        \end{pmatrix}
-        \end{aligned}
-        $$
-    with
-        $$
-        S_x =\frac{1}{2}\left (\sigma_x^j + \sigma_x^k \right)
-        $$
-    and the Pauli matrix
-        $$
-        \sigma_x =
-        \begin{pmatrix}
-        0 & 1 \\ 1 & 0
-        \end{pmatrix}.
-        $$
-
-    A fully-entangling gate between qubit 0 and qubit 1 therefore is
-        $$
-        U_{\mathrm{MS}}^{0,1} \left (0.5 \right) = \frac{1}{\sqrt{2}}
-        \begin{pmatrix}
-        1 && 0 && 0 && -\mathrm{i} \\ 0 && 1 && -\mathrm{i} && 0 \\
-        0 && -\mathrm{i} && 1 && 0 \\ -\mathrm{i} && 0 && 0 && 1
-        \end{pmatrix}
-        $$
-
-    **Examples:**
-        $$
-        \begin{align*}
-        U_{\mathrm{MS}}^{j,k}(0.5) \ket{0_j0_k} &=
-        \frac{1}{\sqrt{2}}\left (\ket{0_j0_k} -\mathrm{i} \ket{1_j1_k} \right ) \\
-        U_{\mathrm{MS}}^{j,k}(0.5) \ket{1_j1_k} &=
-        \frac{1}{\sqrt{2}}\left ( -\mathrm{i}\ket{0_j0_k} + \ket{1_j1_k} \right )
-        \end{align*}
-        $$
+    Details can be found in the description of the GateRXX schema in https://arnica.aqt.eu/api/v1/docs
     """
 
     def __init__(self, **data: Any) -> None:
