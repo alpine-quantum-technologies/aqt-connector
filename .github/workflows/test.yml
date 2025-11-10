@@ -8,6 +8,8 @@ on:
 
 env:
   PYTHONIOENCODING: utf-8
+  UV_VERSION: "0.7.2"
+  TARGET_PYTHON: "3.12"
 
 jobs:
   test:
@@ -18,7 +20,6 @@ jobs:
     strategy:
       matrix:
         python-version: ['3.9', '3.10', '3.11', '3.12', '3.13']
-        uv-version: ["0.7.2"]
         os: ["ubuntu-latest", "windows-latest"]
 
     steps:
@@ -29,10 +30,10 @@ jobs:
         with:
             python-version: ${{ matrix.python-version }}
 
-      - name: Install uv
+      - name: Install uv ${{ env.UV_VERSION }}
         uses: astral-sh/setup-uv@v5
         with:
-          version: ${{ matrix.uv-version }}
+          version: ${{ env.UV_VERSION }}
 
       - name: Check lock file status
         run: uv lock --check
@@ -75,6 +76,8 @@ jobs:
     if: ${{ needs.test.result == 'success' && github.ref == 'refs/heads/main' }}
     
     steps:
+      - uses: actions/checkout@v4
+        
       - name: Check for changes requiring integration testing
         id: changed-files
         uses: tj-actions/changed-files@v45
@@ -83,9 +86,30 @@ jobs:
               aqt_connector/_infrastructure/**
               tests/integration/**
 
+      - name: Skip integration tests when nothing changed
+        if: steps.changed-files.outputs.any_changed == 'false'
+        run: |
+          echo "No integration-related changes detected. Skipping integration tests."
+          exit 0
+
+      - name: Set up Python ${{ env.TARGET_PYTHON }}
+        uses: actions/setup-python@v5
+        with:
+            python-version: ${{ env.TARGET_PYTHON }}
+
+      - name: Install uv ${{ env.UV_VERSION }}
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: ${{ env.UV_VERSION }}
+
+      - name: Install all dependencies
+        run: uv sync --all-groups
+
       - name: Run integration tests upon changes
-        if: steps.changed-files.outputs.any_changed == 'true'
-        run: uvx playwright install && uv run pytest ./tests/integration/ 
+        run: |
+          sudo uvx playwright install-deps chromium
+          uvx playwright install chromium
+          uv run pytest ./tests/integration/
         env: 
           AUTH0_TEST_TENANT_URL: ${{ secrets.AUTH0_TEST_TENANT_URL }}
           AUTH0_TEST_DEVICE_FLOW_CLIENT_ID: ${{ secrets.AUTH0_TEST_DEVICE_FLOW_CLIENT_ID }}
@@ -102,15 +126,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python 3.12
+      - name: Set up Python ${{ env.TARGET_PYTHON }}
         uses: actions/setup-python@v5
         with:
-            python-version: 3.12
+            python-version: ${{ env.TARGET_PYTHON }}
 
-      - name: Install uv
+      - name: Install uv ${{ env.UV_VERSION }}
         uses: astral-sh/setup-uv@v5
         with:
-          version: "0.7.2"
+          version: ${{ env.UV_VERSION }}
 
       - name: Install all dependencies
         run: uv sync --all-groups
