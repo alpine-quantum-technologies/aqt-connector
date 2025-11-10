@@ -106,7 +106,10 @@ jobs:
         run: uv sync --all-groups
 
       - name: Run integration tests upon changes
-        run: uvx playwright install && uv run pytest ./tests/integration/ 
+        run: |
+          sudo uvx playwright install-deps chromium
+          uvx playwright install chromium
+          uv run pytest ./tests/integration/
         env: 
           AUTH0_TEST_TENANT_URL: ${{ secrets.AUTH0_TEST_TENANT_URL }}
           AUTH0_TEST_DEVICE_FLOW_CLIENT_ID: ${{ secrets.AUTH0_TEST_DEVICE_FLOW_CLIENT_ID }}
