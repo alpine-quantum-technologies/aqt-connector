@@ -5,7 +5,7 @@ from enum import Enum
 
 class ResourceType(str, Enum):
     """Type of an ARNICA quantum resource.
-    
+
     The possible values are:
         - SIMULATOR: Service that simulates the behaviour of a quantum computer
         - DEVICE: A physical quantum computer
@@ -17,7 +17,7 @@ class ResourceType(str, Enum):
 
 class ResourceStatus(str, Enum):
     """Status of an ARNICA quantum resource.
-    
+
     The possible values are:
         - MAINTENANCE: The resource is under maintenance
         - OFFLINE: The resource is offline

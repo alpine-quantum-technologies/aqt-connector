@@ -10,7 +10,7 @@ from pydantic import BaseModel, Field
 
 class JobStatus(str, Enum):
     """Status of an ARNICA job.
-    
+
     Possible values are:
         - CANCELLED: The job was cancelled
         - ERROR: The job processing failed
@@ -28,18 +28,20 @@ class JobStatus(str, Enum):
 
 class JobType(str, Enum):
     """ARNICA job types.
-    
+
     Possible values are:
         - QUANTUM_CIRCUIT: A job containing a list of quantum circuits
     """
 
     QUANTUM_CIRCUIT = "quantum_circuit"
 
+
 class StatusChange(BaseModel):
     """Model for a job status change."""
 
     new_status: JobStatus
     timestamp: datetime
+
 
 class BasicJobMetadata(BaseModel):
     """Metadata for a user-submitted job."""
