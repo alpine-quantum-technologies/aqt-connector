@@ -2,6 +2,7 @@ from aqt_connector._domain.auth_service import AuthService
 from aqt_connector._domain.job_service import JobService
 from aqt_connector._domain.oidc_service import OIDCService
 from aqt_connector._infrastructure.access_token_verifier import AccessTokenVerifier, AccessTokenVerifierConfig
+from aqt_connector._infrastructure.arnica_adapter import ArnicaAdapter
 from aqt_connector._infrastructure.auth0_adapter import Auth0Adapter
 from aqt_connector._infrastructure.token_repository import TokenRepository
 from aqt_connector._sdk_config import ArnicaConfig
@@ -31,4 +32,4 @@ class ArnicaApp:
         self.oidc_service = OIDCService(Auth0Adapter(config.oidc_config), token_verifier)
         self.auth_service = AuthService(token_verifier, TokenRepository(config._app_dir), self.oidc_service)
 
-        self.job_service = JobService()
+        self.job_service = JobService(ArnicaAdapter())
