@@ -22,7 +22,7 @@ class ResourceStatus(str, Enum):
         - MAINTENANCE: The resource is under maintenance
         - OFFLINE: The resource is offline
         - ONLINE: The resource is online
-        - UNAVAILABLE: The resource is not available to the user
+        - UNAVAILABLE: The status of the resource is currently not available to the user
     """
 
     MAINTENANCE = "maintenance"

@@ -39,7 +39,7 @@ class PositiveFloatValueWithUncertainty(BaseModel):
 class Characterisation(BaseModel):
     """Characterisation data describing a resources properties.
 
-    Details can be found in the description of the Characterisation schema in https://arnica.aqt.eu/api/v1/docs
+    Details can be found in the description of `Characterisation` in https://arnica.aqt.eu/api/v1/docs
 
     Attributes:
         single_qubit_gate_fidelity: The single-qubit gate fidelity for each qubit.

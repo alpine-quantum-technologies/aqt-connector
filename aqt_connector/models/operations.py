@@ -56,7 +56,7 @@ class SingleQubitGate(AbstractGate):
 class GateRZ(SingleQubitGate):
     r"""### A single-qubit rotation around the Bloch sphere's z-axis.
 
-    Details can be found in the description of the GateRZ schema in https://arnica.aqt.eu/api/v1/docs
+    Details can be found in the description of `GateRZ` in https://arnica.aqt.eu/api/v1/docs
     """
 
     def __init__(self, **data: Any) -> None:
@@ -70,7 +70,7 @@ class GateRZ(SingleQubitGate):
 class GateR(SingleQubitGate):
     r"""### A single-qubit rotation around an arbitrary axis on the Bloch sphere's equatorial plane.
 
-    Details can be found in the description of the GateR schema in https://arnica.aqt.eu/api/v1/docs
+    Details can be found in the description of `GateR` in https://arnica.aqt.eu/api/v1/docs
     """
 
     def __init__(self, **data: Any) -> None:
@@ -85,7 +85,7 @@ class GateR(SingleQubitGate):
 class GateRXX(AbstractGate):
     r"""### A two-qubit entangling gate of Mølmer-Sørensen-type.
 
-    Details can be found in the description of the GateRXX schema in https://arnica.aqt.eu/api/v1/docs
+    Details can be found in the description of `GateRXX` in https://arnica.aqt.eu/api/v1/docs
     """
 
     def __init__(self, **data: Any) -> None:
