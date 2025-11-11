@@ -1,4 +1,4 @@
-"""ARNICA Quantum Operation Models."""
+"""AQT-connector models for quantum operations."""
 
 from abc import ABC, abstractmethod
 from math import inf
@@ -54,34 +54,9 @@ class SingleQubitGate(AbstractGate):
 
 
 class GateRZ(SingleQubitGate):
-    r"""### A single-qubit rotation rotation around the Bloch sphere's z-axis.
+    r"""### A single-qubit rotation around the Bloch sphere's z-axis.
 
-    The Rz-gate on qubit j with pulse area θ in units of π is defined as
-        $$
-        U_{\mathrm{R_z}}^j(\theta) =
-        \exp\left( -\mathrm{i} \theta \frac{\pi}{2} \sigma_z^j \right) =
-        \begin{pmatrix}
-        \cos(\theta \frac{\pi}{2}) -\mathrm{i}\sin(\theta \frac{\pi}{2}) && 0 \\
-        0 && \cos(\theta \frac{\pi}{2}) +\mathrm{i}\sin(\theta \frac{\pi}{2})
-        \end{pmatrix}
-        $$
-    with the Pauli matrix
-        $$
-        \sigma_z =
-        \begin{pmatrix}
-        1 & 0 \\ 0 & -1
-        \end{pmatrix}.
-        $$
-
-    **Examples:**
-        $$
-        \begin{align*}
-        U_{\mathrm{R_z}}^j(1)\frac{1}{\sqrt{2}}\left( \ket{0_j} + \ket{1_j}\right) &=
-        \frac{1}{\sqrt{2}}\left (\ket{0_j} - \ket{1_j} \right ) \\
-        U_{\mathrm{R_z}}^j(0.5)\frac{1}{\sqrt{2}}\left (\ket{0_j} + \ket{1_j} \right) &=
-        \frac{1}{\sqrt{2}}\left (\ket{0_j} +\mathrm{i}\ket{1_j} \right )
-        \end{align*}
-        $$
+    Details can be found in the description of `GateRZ` in https://arnica.aqt.eu/api/v1/docs
     """
 
     def __init__(self, **data: Any) -> None:
@@ -95,37 +70,7 @@ class GateRZ(SingleQubitGate):
 class GateR(SingleQubitGate):
     r"""### A single-qubit rotation around an arbitrary axis on the Bloch sphere's equatorial plane.
 
-    The R-gate on qubit j with pulse area θ and mixing angle φ, both in units of π, is defined as
-        $$
-        U_{\mathrm{R}}^j(\theta,\varphi) =
-        \exp\left( -\mathrm{i} \theta \frac{\pi}{2}
-        \left[\sin(\varphi \pi)\sigma_y^j + \cos(\varphi \pi)\sigma_x^j \right] \right) =
-        \begin{pmatrix}
-        \cos(\theta \frac{\pi}{2}) && -\mathrm{i} e^{-\mathrm{i} \varphi \pi}\sin(\theta \frac{\pi}{2})\\
-        -\mathrm{i} e^{\mathrm{i} \varphi \pi}\sin(\theta \frac{\pi}{2}) && \cos(\theta \frac{\pi}{2})
-        \end{pmatrix}
-        $$
-    with the Pauli matrices
-        $$
-        \sigma_x =
-        \begin{pmatrix}
-        0 & 1 \\ 1 & 0
-        \end{pmatrix} ,
-        \sigma_y =
-        \begin{pmatrix}
-        0 & -\mathrm{i} \\ \mathrm{i} & 0
-        \end{pmatrix}.
-        $$
-
-    **Examples:**
-        $$
-        \begin{align*}
-        U_{\mathrm{R}}^j(0.5, 0) \ket{0_j} &=
-        \frac{1}{\sqrt{2}}\left (\ket{0_j} - \mathrm{i}\ket{1_j} \right )\\
-        U_{\mathrm{R}}^j(0.5, 0.5) \ket{0_j} &=
-        \frac{1}{\sqrt{2}}\left (\ket{0_j} + \ket{1_j} \right )
-        \end{align*}
-        $$
+    Details can be found in the description of `GateR` in https://arnica.aqt.eu/api/v1/docs
     """
 
     def __init__(self, **data: Any) -> None:
@@ -140,58 +85,13 @@ class GateR(SingleQubitGate):
 class GateRXX(AbstractGate):
     r"""### A two-qubit entangling gate of Mølmer-Sørensen-type.
 
-    The MS-gate on qubits j and k with pulse area θ in units of π is defined as
-        $$
-        \begin{aligned}
-        U_{\mathrm{MS}}^{j,k} \left (\theta \right) & =
-        e^{\mathrm{i}\theta\frac{\pi}{2}}\exp{\left(-\mathrm{i} \theta \pi {S_x}^2 \right) }
-        = \begin{pmatrix}
-        \cos(\theta \frac{\pi}{2}) & 0 & 0 && -\mathrm{i}\sin(\theta \frac{\pi}{2}) \\
-        0 & \cos(\theta \frac{\pi}{2}) & -\mathrm{i}\sin(\theta \frac{\pi}{2}) && 0 \\
-        0 & -\mathrm{i}\sin(\theta\frac{\pi}{2}) & \cos(\theta \frac{\pi}{2}) && 0 \\
-        -\mathrm{i}\sin(\theta \frac{\pi}{2}) & 0 & 0 && \cos(\theta \frac{\pi}{2})
-        \end{pmatrix}
-        \end{aligned}
-        $$
-    with
-        $$
-        S_x =\frac{1}{2}\left (\sigma_x^j + \sigma_x^k \right)
-        $$
-    and the Pauli matrix
-        $$
-        \sigma_x =
-        \begin{pmatrix}
-        0 & 1 \\ 1 & 0
-        \end{pmatrix}.
-        $$
-
-    A fully-entangling gate between qubit 0 and qubit 1 therefore is
-        $$
-        U_{\mathrm{MS}}^{0,1} \left (0.5 \right) = \frac{1}{\sqrt{2}}
-        \begin{pmatrix}
-        1 && 0 && 0 && -\mathrm{i} \\ 0 && 1 && -\mathrm{i} && 0 \\
-        0 && -\mathrm{i} && 1 && 0 \\ -\mathrm{i} && 0 && 0 && 1
-        \end{pmatrix}
-        $$
-
-    **Examples:**
-        $$
-        \begin{align*}
-        U_{\mathrm{MS}}^{j,k}(0.5) \ket{0_j0_k} &=
-        \frac{1}{\sqrt{2}}\left (\ket{0_j0_k} -\mathrm{i} \ket{1_j1_k} \right ) \\
-        U_{\mathrm{MS}}^{j,k}(0.5) \ket{1_j1_k} &=
-        \frac{1}{\sqrt{2}}\left ( -\mathrm{i}\ket{0_j0_k} + \ket{1_j1_k} \right )
-        \end{align*}
-        $$
+    Details can be found in the description of `GateRXX` in https://arnica.aqt.eu/api/v1/docs
     """
 
     def __init__(self, **data: Any) -> None:
         data["operation"] = "RXX"
         super().__init__(**data)
 
-    # constraint unique_items does not work for Tuple
-    # We are using a custom validator, but the constraint is not part of
-    # the OpenApi spec.
     qubits: list[NonNegativeInt] = Field(min_length=2, max_length=2)
     theta: float = Field(ge=0.0, le=0.5)
     operation: Literal["RXX"]
@@ -199,6 +99,7 @@ class GateRXX(AbstractGate):
     @field_validator("qubits")
     @classmethod
     def validate_qubits_unique(cls, v: list[NonNegativeInt]) -> list[NonNegativeInt]:
+        """Constraint unique_items does not work for Tuple, therefore we are using a custom validator."""
         if v[0] == v[1]:
             raise ValidationError("addressed qubits must be unique")
         return v

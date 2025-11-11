@@ -1,4 +1,4 @@
-"""ARNICA Core Quantum Circuit Models."""
+"""AQT-connector models for circuits."""
 
 from collections.abc import Iterator
 
