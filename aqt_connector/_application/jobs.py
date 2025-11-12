@@ -17,6 +17,12 @@ def fetch_job_state(app: ArnicaApp, job_id: UUID, *, api_token: Optional[str] = 
 
     Raises:
         NotAuthenticatedError: if the user is not authenticated and no access token is available.
+        RequestError: If there is a network-related error during the request.
+        NotAuthenticatedError: If the provided token is invalid or expired.
+        JobNotFoundError: If the job with the specified ID does not exist.
+        InvalidJobIDError: If the provided job ID is not valid.
+        UnknownServerError: If the Arnica API encounters an internal error.
+        RuntimeError: For any other unexpected errors.
 
     Returns:
         JobState: the state of the job.

@@ -19,5 +19,13 @@ class JobService:
         Args:
             token (str): The authentication token to use.
             job_id (UUID): The ID of the job to fetch the state for.
+
+        Raises:
+            RequestError: If there is a network-related error during the request.
+            NotAuthenticatedError: If the provided token is invalid or expired.
+            JobNotFoundError: If the job with the specified ID does not exist.
+            InvalidJobIDError: If the provided job ID is not valid.
+            UnknownServerError: If the Arnica API encounters an internal error.
+            RuntimeError: For any other unexpected errors.
         """
         return self.arnica.fetch_job_state(token, job_id)
