@@ -1,6 +1,7 @@
 # Changelog
 
 ## unreleased
+* Add fetch job state
 
 ## aqt-connector 0.1.0
 * Add license and changelog. Update pyproject.toml #3

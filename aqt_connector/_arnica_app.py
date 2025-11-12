@@ -32,4 +32,4 @@ class ArnicaApp:
         self.oidc_service = OIDCService(Auth0Adapter(config.oidc_config), token_verifier)
         self.auth_service = AuthService(token_verifier, TokenRepository(config._app_dir), self.oidc_service)
 
-        self.job_service = JobService(ArnicaAdapter())
+        self.job_service = JobService(ArnicaAdapter(self.config.arnica_url))
