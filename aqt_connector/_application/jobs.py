@@ -1,3 +1,4 @@
+from typing import Optional
 from uuid import UUID
 
 from aqt_connector._arnica_app import ArnicaApp
@@ -5,7 +6,7 @@ from aqt_connector.exceptions import NotAuthenticatedError
 from aqt_connector.models.arnica.response_bodies.jobs import JobState
 
 
-def fetch_job_state(app: ArnicaApp, job_id: UUID, *, api_token: str | None = None) -> JobState:
+def fetch_job_state(app: ArnicaApp, job_id: UUID, *, api_token: Optional[str] = None) -> JobState:
     """Fetch the state of a job.
 
     Args:
