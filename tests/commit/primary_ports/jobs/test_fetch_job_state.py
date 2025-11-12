@@ -62,6 +62,19 @@ def test_it_uses_fetched_token_to_request_job_state() -> None:
     assert app.job_service.given_token == app.auth_service.fetched_token
 
 
+def test_it_uses_provided_api_token() -> None:
+    """It should use a provided API token to request the job state instead of fetching one."""
+    app = ArnicaApp(ArnicaConfig())
+    app.auth_service = AuthServiceSpy()
+    app.job_service = JobServiceSpy()
+
+    provided_token = "provided_api_token"
+    fetch_job_state(app, uuid4(), api_token=provided_token)
+
+    assert app.job_service.given_token == provided_token
+    assert not app.auth_service.was_token_fetched
+
+
 def test_it_raises_if_not_authenticated() -> None:
     """It should raise NotAuthenticatedError if no access token is available."""
     app = ArnicaApp(ArnicaConfig())
