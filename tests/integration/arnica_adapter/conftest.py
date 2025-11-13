@@ -19,17 +19,16 @@ def auth_token() -> str:
     tenant_url = _get_env_var("ARNICA_AUTH_TENANT_URL")
     audience = _get_env_var("ARNICA_SANDBOX_BASE_URL")
 
-    token_payload = {
+    token_request_payload = {
         "client_id": client_id,
         "client_secret": client_secret,
         "audience": audience,
         "grant_type": "client_credentials",
     }
     http_client = httpx.Client()
-    token_response = http_client.post(urljoin(tenant_url, "/oauth/token"), json=token_payload)
+    token_response = http_client.post(urljoin(tenant_url, "/oauth/token"), json=token_request_payload)
     token_response.raise_for_status()
     token_data = token_response.json()
-    print(token_data["access_token"])
     return token_data["access_token"]
 
 
