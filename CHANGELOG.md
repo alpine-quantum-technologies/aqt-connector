@@ -1,6 +1,8 @@
 # Changelog
 
 ## unreleased
+
+## aqt-connector 0.2.0
 * Add fetch job state #8
 * Add Arnica API schemas and update the models #4
 
