@@ -115,6 +115,10 @@ jobs:
           uvx playwright install chromium
           uv run pytest ./tests/integration/
         env: 
+          ARNICA_CLIENT_ID: ${{ secrets.ARNICA_CLIENT_ID }}
+          ARNICA_CLIENT_SECRET: ${{ secrets.ARNICA_CLIENT_SECRET }}
+          ARNICA_AUTH_TENANT_URL: ${{ secrets.ARNICA_AUTH_TENANT_URL }}
+          ARNICA_SANDBOX_BASE_URL: ${{ secrets.ARNICA_SANDBOX_BASE_URL }}
           AUTH0_TEST_TENANT_URL: ${{ secrets.AUTH0_TEST_TENANT_URL }}
           AUTH0_TEST_DEVICE_FLOW_CLIENT_ID: ${{ secrets.AUTH0_TEST_DEVICE_FLOW_CLIENT_ID }}
           AUTH0_TEST_CLIENT_CREDENTIALS_CLIENT_ID: ${{ secrets.AUTH0_TEST_CLIENT_CREDENTIALS_CLIENT_ID }}

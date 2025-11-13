@@ -3,6 +3,7 @@
 from typing import Literal, Union
 
 from pydantic import BaseModel, Field
+from typing_extensions import TypeAlias
 
 from aqt_connector.models import BaseModelSerialisable
 from aqt_connector.models.arnica.jobs import BasicJobMetadata, JobStatus, StatusChange
@@ -49,6 +50,9 @@ class RRCancelled(BaseResponse):  # type: ignore[override, unused-ignore]
     status: Literal[JobStatus.CANCELLED] = JobStatus.CANCELLED
 
 
+JobState: TypeAlias = Union[RRQueued, RROngoing, RRFinished, RRError, RRCancelled]
+
+
 class SubmitJobResponse(BaseModelSerialisable):
     """Response body model for the submit job endpoint."""
 
@@ -60,4 +64,4 @@ class ResultResponse(BaseModelSerialisable):
     """Response body model for the request result endpoint."""
 
     job: BasicJobMetadata
-    response: Union[RRQueued, RROngoing, RRFinished, RRError, RRCancelled]
+    response: JobState

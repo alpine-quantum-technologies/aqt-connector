@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Optional
 
 from aqt_connector._domain.oidc_service import OIDCService
 from aqt_connector._infrastructure.access_token_verifier import AccessTokenVerifier
@@ -23,7 +23,7 @@ class AuthService:
         self._token_repo = token_repository
         self._oidc_service = oidc_service
 
-    def get_access_token(self) -> Union[str, None]:
+    def get_access_token(self) -> Optional[str]:
         """Loads an access token if a valid one is stored.
 
         Returns:
@@ -47,7 +47,7 @@ class AuthService:
         """
         self._token_repo.save_access_token(access_token)
 
-    def get_or_refresh_access_token(self, store: bool) -> Union[str, None]:
+    def get_or_refresh_access_token(self, store: bool) -> Optional[str]:
         """Gets an access token for the current user session, or refreshes it.
 
         Args:
