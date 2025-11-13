@@ -111,8 +111,8 @@ jobs:
 
       - name: Run integration tests upon changes
         run: |
-          uvx playwright install-deps chromium
-          uvx playwright install chromium
+          uv run playwright install-deps chromium
+          uv run playwright install chromium
           uv run pytest ./tests/integration/
         env: 
           ARNICA_CLIENT_ID: ${{ secrets.ARNICA_CLIENT_ID }}
