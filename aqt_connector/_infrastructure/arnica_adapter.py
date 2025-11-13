@@ -1,6 +1,7 @@
 from uuid import UUID
 
 import httpx
+from pydantic import ValidationError
 
 from aqt_connector.exceptions import (
     InvalidJobIDError,
@@ -43,13 +44,15 @@ class ArnicaAdapter:
             JobState: The current state of the job.
         """
         endpoint_url = f"{self._base_url}/v1/result/{job_id}"
+
         try:
             response = self._http_client.get(endpoint_url, headers={"Authorization": f"Bearer {token}"})
+            response.raise_for_status()
+            result = ResultResponse.model_validate_json(response.text)
+
         except httpx.RequestError as exc:
             raise RequestError from exc
 
-        try:
-            response.raise_for_status()
         except httpx.HTTPStatusError as exc:
             exception_map = {
                 401: NotAuthenticatedError,
@@ -62,5 +65,7 @@ class ArnicaAdapter:
                 raise exception_map[exc.response.status_code] from exc
             raise RuntimeError from exc
 
-        result = ResultResponse.model_validate_json(response.text)
+        except ValidationError as exc:
+            raise UnknownServerError from exc
+
         return result.response

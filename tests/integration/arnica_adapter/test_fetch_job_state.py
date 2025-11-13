@@ -50,7 +50,7 @@ def test_it_raises_job_expired_error_on_410(arnica_base_url: str, auth_token: st
         arnica_adapter.fetch_job_state(auth_token, job_id=expired_job_id)
 
 
-# SIMULATED
+@pytest.mark.simulated
 def test_it_raises_invalid_job_id_error_on_422(arnica_base_url: str) -> None:
     """It should raise InvalidJobIDError when Arnica responds with 422 Unprocessable Entity."""
     arnica_adapter = ArnicaAdapter(base_url=arnica_base_url)
@@ -61,7 +61,7 @@ def test_it_raises_invalid_job_id_error_on_422(arnica_base_url: str) -> None:
         arnica_adapter.fetch_job_state("dummy_token", job_id=uuid4())
 
 
-# SIMULATED
+@pytest.mark.simulated
 def test_it_raises_unknown_server_error_on_500(arnica_base_url: str) -> None:
     """It should raise InvalidJobIDError when Arnica responds with 422 Unprocessable Entity."""
     arnica_adapter = ArnicaAdapter(base_url=arnica_base_url)
@@ -72,7 +72,7 @@ def test_it_raises_unknown_server_error_on_500(arnica_base_url: str) -> None:
         arnica_adapter.fetch_job_state("dummy_token", job_id=uuid4())
 
 
-# SIMULATED
+@pytest.mark.simulated
 def test_it_raises_network_error_on_request_error(arnica_base_url: str) -> None:
     """It should raise NetworkError when a network error occurs during the request."""
 
@@ -84,4 +84,37 @@ def test_it_raises_network_error_on_request_error(arnica_base_url: str) -> None:
     arnica_adapter._http_client = httpx.Client(transport=transport)
 
     with pytest.raises(RequestError):
+        arnica_adapter.fetch_job_state("dummy_token", job_id=uuid4())
+
+
+@pytest.mark.simulated
+def test_it_raises_runtime_error_on_unexpected_status_code(arnica_base_url: str) -> None:
+    """It should raise RuntimeError when an unexpected status code is returned."""
+
+    def return_teapot(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(status_code=418)
+
+    arnica_adapter = ArnicaAdapter(base_url=arnica_base_url)
+    transport = httpx.MockTransport(return_teapot)
+    arnica_adapter._http_client = httpx.Client(transport=transport)
+
+    with pytest.raises(RuntimeError):
+        arnica_adapter.fetch_job_state("dummy_token", job_id=uuid4())
+
+
+@pytest.mark.simulated
+def test_it_raises_unknown_server_error_on_validation_failure(arnica_base_url: str) -> None:
+    """It should raise UnknownServerError when response validation fails."""
+
+    def return_malformed_response(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(
+            status_code=200,
+            json={"invalid_field": "invalid_value"},
+        )
+
+    arnica_adapter = ArnicaAdapter(base_url=arnica_base_url)
+    transport = httpx.MockTransport(return_malformed_response)
+    arnica_adapter._http_client = httpx.Client(transport=transport)
+
+    with pytest.raises(UnknownServerError):
         arnica_adapter.fetch_job_state("dummy_token", job_id=uuid4())
