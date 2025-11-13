@@ -1,2 +1,0 @@
-[pytest]
-markers = ["simulated: mark integration test as simulated to indicate it doesn't require real external resources"]
