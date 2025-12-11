@@ -49,7 +49,7 @@ class QuantumCircuit(BaseModel):
     quantum_circuit: Circuit
     """Description of the circuit to execute on the computing resource."""
 
-    number_of_qubits: int = Field(ge=1, le=20)
+    number_of_qubits: int = Field(ge=1, le=31)
     """Number of qubits used in the circuit."""
 
     @model_validator(mode="after")
