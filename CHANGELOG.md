@@ -1,6 +1,8 @@
 # Changelog
 
 ## unreleased
+
+## aqt-connector 0.3.0
 * Increase circuit qubit limit to <=31 #11
 
 ## aqt-connector 0.2.0
