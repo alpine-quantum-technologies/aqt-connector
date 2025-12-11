@@ -1,6 +1,7 @@
 # Changelog
 
 ## unreleased
+* Increase circuit qubit limit to <=31 #11
 
 ## aqt-connector 0.2.0
 * Add fetch job state #8
