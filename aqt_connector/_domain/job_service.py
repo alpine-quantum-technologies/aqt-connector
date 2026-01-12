@@ -43,7 +43,7 @@ class JobService:
         *,
         query_interval_seconds: float = 1.0,
         wait: Callable[[float], None] = time.sleep,
-        max_attempts: int = 60 * 10,  # 10 minutes (average)
+        max_attempts: int = 600,  # 10 minutes (average)
         out: TextIO = sys.stdout,
     ) -> JobState:
         """Waits for the job with the given ID to complete and returns its final state.
