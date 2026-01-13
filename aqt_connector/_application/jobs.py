@@ -42,7 +42,7 @@ def wait_for_final_state(
     query_interval_seconds: float = 1.0,
     max_attempts: int = 600,
     out: TextIO = sys.stdout,
-) -> JobState:
+) -> JobState:  # TODO: narrow down type to finished states only
     """Wait for a job to reach a final state.
 
     Polls the job state until it reaches a finished state or the maximum number of attempts is reached. A finished
@@ -72,10 +72,29 @@ def wait_for_final_state(
     token = api_token or app.auth_service.get_or_refresh_access_token(app.config.store_access_token)
     if not token:
         raise NotAuthenticatedError("User not authenticated. Please log in.")
-    return app.job_service.wait_for_result(
-        token,
-        job_id,
-        query_interval_seconds=query_interval_seconds,
-        max_attempts=max_attempts,
-        out=out,
-    )
+
+    # User-managed token provided, don't attempt to refresh
+    if api_token:
+        return app.job_service.wait_for_result(
+            token,
+            job_id,
+            query_interval_seconds=query_interval_seconds,
+            max_attempts=max_attempts,
+            out=out,
+        )
+
+    # Token to refresh as needed
+    while True:
+        try:
+            return app.job_service.wait_for_result(
+                token,
+                job_id,
+                query_interval_seconds=query_interval_seconds,
+                max_attempts=max_attempts,
+                out=out,
+            )
+        except NotAuthenticatedError:
+            refreshed = app.auth_service.get_or_refresh_access_token(app.config.store_access_token)
+            if not refreshed or refreshed == token:
+                raise
+            token = refreshed
