@@ -1,7 +1,7 @@
 import sys
 import time
 from collections.abc import Callable
-from typing import Optional, TextIO
+from typing import Optional, TextIO, cast
 from uuid import UUID, uuid4
 
 import pytest
@@ -11,7 +11,7 @@ from aqt_connector._application.jobs import wait_for_final_state
 from aqt_connector._domain.auth_service import AuthService
 from aqt_connector._domain.job_service import JobService
 from aqt_connector.exceptions import InvalidJobIDError, JobNotFoundError, NotAuthenticatedError, UnknownServerError
-from aqt_connector.models.arnica.response_bodies.jobs import JobState, RRCancelled, RRQueued
+from aqt_connector.models.arnica.response_bodies.jobs import FinalJobState, RRCancelled, RRQueued
 from tests.commit.domain.stdout_spy import StdoutSpy
 
 
@@ -49,13 +49,13 @@ class JobServiceSpy(JobService):
         wait: Callable[[float], None] = time.sleep,
         max_attempts: int = 600,
         out: TextIO = sys.stdout,
-    ) -> JobState:
+    ) -> FinalJobState:
         self.given_token = token
         self.requested_job_id = job_id
         self.given_query_interval_seconds = query_interval_seconds
         self.given_max_attempts = max_attempts
         self.given_out = out
-        return self.returned_state
+        return cast(FinalJobState, self.returned_state)
 
 
 def test_it_gets_or_refreshes_token_before_requesting_job_state() -> None:
@@ -158,7 +158,7 @@ def test_it_retries_after_not_authenticated_once_by_refreshing_token_and_succeed
             wait: Callable[[float], None] = time.sleep,
             max_attempts: int = 600,
             out: TextIO = sys.stdout,
-        ) -> JobState:
+        ) -> FinalJobState:
             if self.call_count == 0:
                 self.call_count = 1
                 raise NotAuthenticatedError
@@ -194,7 +194,7 @@ def test_it_propagates_not_authenticated_error_when_refresh_returns_none() -> No
             wait: Callable[[float], None] = time.sleep,
             max_attempts: int = 600,
             out: TextIO = sys.stdout,
-        ) -> JobState:
+        ) -> FinalJobState:
             raise NotAuthenticatedError
 
     app = ArnicaApp(ArnicaConfig())
@@ -222,7 +222,7 @@ def test_it_propagates_not_authenticated_error_when_refresh_returns_same_token()
             wait: Callable[[float], None] = time.sleep,
             max_attempts: int = 600,
             out: TextIO = sys.stdout,
-        ) -> JobState:
+        ) -> FinalJobState:
             raise NotAuthenticatedError
 
     app = ArnicaApp(ArnicaConfig())
@@ -234,7 +234,7 @@ def test_it_propagates_not_authenticated_error_when_refresh_returns_same_token()
 
 
 def test_it_does_not_attempt_refresh_when_static_api_token_and_not_authenticated_error_occurs() -> None:
-    """It should not attempt to refresh the token when a static API token is provided and NotAuthenticatedError occurs."""
+    """It should not attempt to refresh the token when a user-managed API token is provided."""
 
     class JobServiceDouble(JobServiceSpy):
         def wait_for_result(
@@ -246,7 +246,7 @@ def test_it_does_not_attempt_refresh_when_static_api_token_and_not_authenticated
             wait: Callable[[float], None] = time.sleep,
             max_attempts: int = 600,
             out: TextIO = sys.stdout,
-        ) -> JobState:
+        ) -> FinalJobState:
             raise NotAuthenticatedError
 
     app = ArnicaApp(ArnicaConfig())
@@ -282,7 +282,7 @@ def test_it_propagates_other_exceptions_from_job_service(exception_type: type[Ex
             wait: Callable[[float], None] = time.sleep,
             max_attempts: int = 600,
             out: TextIO = sys.stdout,
-        ) -> JobState:
+        ) -> FinalJobState:
             raise exception_type()
 
     app = ArnicaApp(ArnicaConfig())
@@ -293,7 +293,7 @@ def test_it_propagates_other_exceptions_from_job_service(exception_type: type[Ex
         wait_for_final_state(app, uuid4())
 
 
-def test_it_handles_mutliple_sequential_token_expiries_and_retries_until_success() -> None:
+def test_it_handles_multiple_sequential_token_expiries_and_retries_until_success() -> None:
     """It should handle multiple sequential NotAuthenticatedError exceptions by refreshing the token until success."""
 
     class AuthServiceDouble(AuthServiceSpy):
@@ -314,7 +314,7 @@ def test_it_handles_mutliple_sequential_token_expiries_and_retries_until_success
             wait: Callable[[float], None] = time.sleep,
             max_attempts: int = 600,
             out: TextIO = sys.stdout,
-        ) -> JobState:
+        ) -> FinalJobState:
             if self.call_count < 2:
                 self.call_count += 1
                 raise NotAuthenticatedError

@@ -4,7 +4,7 @@ from uuid import UUID
 
 from aqt_connector._arnica_app import ArnicaApp
 from aqt_connector.exceptions import NotAuthenticatedError
-from aqt_connector.models.arnica.response_bodies.jobs import JobState
+from aqt_connector.models.arnica.response_bodies.jobs import FinalJobState, JobState
 
 
 def fetch_job_state(app: ArnicaApp, job_id: UUID, *, api_token: Optional[str] = None) -> JobState:
@@ -42,7 +42,7 @@ def wait_for_final_state(
     query_interval_seconds: float = 1.0,
     max_attempts: int = 600,
     out: TextIO = sys.stdout,
-) -> JobState:  # TODO: narrow down type to finished states only
+) -> FinalJobState:
     """Wait for a job to reach a final state.
 
     Polls the job state until it reaches a finished state or the maximum number of attempts is reached. A finished

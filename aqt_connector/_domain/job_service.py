@@ -2,12 +2,12 @@ import random
 import sys
 import time
 from collections.abc import Callable
-from typing import TextIO
+from typing import TextIO, cast
 from uuid import UUID
 
 from aqt_connector._infrastructure.arnica_adapter import ArnicaAdapter
 from aqt_connector.exceptions import RequestError
-from aqt_connector.models.arnica.response_bodies.jobs import JobState
+from aqt_connector.models.arnica.response_bodies.jobs import FinalJobState, JobState
 
 
 class JobService:
@@ -45,7 +45,7 @@ class JobService:
         wait: Callable[[float], None] = time.sleep,
         max_attempts: int = 600,  # 10 minutes (average)
         out: TextIO = sys.stdout,
-    ) -> JobState:
+    ) -> FinalJobState:
         """Waits for the job with the given ID to complete and returns its final state.
 
         The endpoint is queried repeatedly until the job reaches a finished state or the maximum
@@ -77,7 +77,7 @@ class JobService:
             try:
                 job_state = self.arnica.fetch_job_state(token, job_id)
                 if job_state.is_finished():
-                    return job_state
+                    return cast(FinalJobState, job_state)
 
             except RequestError as err:
                 out.write(f"Transient ({type(err).__name__}) error encountered while fetching job state: {err}.\n")

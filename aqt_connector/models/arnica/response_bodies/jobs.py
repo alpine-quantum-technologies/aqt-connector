@@ -55,6 +55,7 @@ class RRCancelled(BaseResponse):  # type: ignore[override, unused-ignore]
 
 
 JobState: TypeAlias = Union[RRQueued, RROngoing, RRFinished, RRError, RRCancelled]
+FinalJobState: TypeAlias = Union[RRFinished, RRError, RRCancelled]
 
 
 class SubmitJobResponse(BaseModelSerialisable):
