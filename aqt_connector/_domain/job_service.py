@@ -87,7 +87,7 @@ class JobService:
 
             wait(
                 random.uniform(
-                    query_interval_seconds - query_interval_seconds * 0.5,
-                    query_interval_seconds + query_interval_seconds * 0.5,
+                    query_interval_seconds * 0.5,
+                    query_interval_seconds * 1.5,
                 )
             )
