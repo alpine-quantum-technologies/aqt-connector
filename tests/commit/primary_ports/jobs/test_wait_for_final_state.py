@@ -81,7 +81,7 @@ def test_it_uses_fetched_token_to_request_job_state() -> None:
     assert app.job_service.given_token == app.auth_service.fetched_token
 
 
-def test_it_uses_provided_api_token_and_does_not_refresh() -> None:
+def test_it_uses_provided_api_token_and_does_not_fetch_one() -> None:
     """It should use a provided API token to request the job state instead of fetching one."""
     app = ArnicaApp(ArnicaConfig())
     app.auth_service = AuthServiceSpy()

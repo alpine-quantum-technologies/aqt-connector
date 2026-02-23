@@ -163,10 +163,10 @@ def test_it_continues_polling_on_transient_request_errors() -> None:
     )
 
 
-def test_it_raises_request_error_after_max_attempts() -> None:
+def test_it_raises_timeout_error_after_max_attempts() -> None:
     """It should raise TimeoutError after reaching max attempts."""
-    adapter_spy = ArnicaAdapterWithTransientErrors()
-    adapter_spy.error_for_calls = 5
+    adapter_spy = ArnicaAdapterSpy()
+    adapter_spy.returned_state = RRQueued()
     service = JobService(adapter_spy)
 
     def wait_mock(duration: float) -> None: ...
