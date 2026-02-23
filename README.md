@@ -36,6 +36,7 @@ pip install aqt-connector
 ## Quickstart
 
 ### Python API
+By obtaining an access token through one of the following methods, it will be verified and stored locally. The stored token is re-used in later `log_in` attempts and does thus not require you to authenticate again, unless the token has expired.
 
 ```python
 from aqt_connector import ArnicaApp, ArnicaConfig, log_in, get_access_token

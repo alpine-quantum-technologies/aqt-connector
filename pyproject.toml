@@ -1,6 +1,5 @@
 [build-system]
 build-backend = "hatchling.build"
-
 requires = [ "hatchling" ]
 
 [project]
@@ -15,15 +14,12 @@ keywords = [
   "Direct Access API",
   "Quantum Computing",
 ]
-
 license = "Apache-2.0"
 license-files = [ "LICENSE" ]
 authors = [
   { name = "Alpine Quantum Technologies GmbH", email = "support.arnica@aqt.eu" },
 ]
-
 requires-python = ">=3.9,<3.14"
-
 classifiers = [
   "Programming Language :: Python :: 3 :: Only",
   "Programming Language :: Python :: 3.9",
@@ -59,12 +55,10 @@ dev = [
   "twine>=6.2",
   "typos~=1.30.1",
 ]
-
 test = [
   "interrogate~=1.7.0",
   "pytest-playwright~=0.7.0",
 ]
-
 docs = [
   "pdoc3~=0.11.5",
 ]
@@ -72,7 +66,6 @@ docs = [
 [tool.ruff]
 # Allow lines to be as long as 120.
 line-length = 120
-
 lint.select = [
   # flake8-bugbear
   "B",
