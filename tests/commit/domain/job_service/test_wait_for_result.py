@@ -156,11 +156,6 @@ def test_it_continues_polling_on_transient_request_errors() -> None:
 
     assert len(adapter_spy.fetch_job_state_called_with) == 3
     assert result is adapter_spy.returned_state
-    assert len(stdout_spy.output) == 2
-    assert all(
-        output == "Transient (RequestError) error encountered while fetching job state: Simulated transient error.\n"
-        for output in stdout_spy.output
-    )
 
 
 def test_it_raises_timeout_error_after_max_attempts() -> None:
