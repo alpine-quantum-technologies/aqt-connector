@@ -16,6 +16,10 @@ class BaseResponse(BaseModel):
     status: JobStatus
     timing_data: Union[list[StatusChange], None] = None
 
+    def is_finished(self) -> bool:
+        """Returns whether the job is in a finished state."""
+        return self.status == JobStatus.FINISHED or self.status == JobStatus.ERROR or self.status == JobStatus.CANCELLED
+
 
 class RRQueued(BaseResponse):  # type: ignore[override, unused-ignore]
     """Result metadata for a queued job."""
@@ -51,6 +55,7 @@ class RRCancelled(BaseResponse):  # type: ignore[override, unused-ignore]
 
 
 JobState: TypeAlias = Union[RRQueued, RROngoing, RRFinished, RRError, RRCancelled]
+FinalJobState: TypeAlias = Union[RRFinished, RRError, RRCancelled]
 
 
 class SubmitJobResponse(BaseModelSerialisable):

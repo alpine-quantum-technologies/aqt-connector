@@ -1,5 +1,4 @@
-from io import StringIO
-from typing import Optional, Union
+from typing import Union
 
 import pytest
 
@@ -8,6 +7,7 @@ from aqt_connector._domain.oidc_service import OIDCService
 from aqt_connector._infrastructure.access_token_verifier import AccessTokenVerifier
 from aqt_connector._infrastructure.auth0_adapter import Auth0Adapter
 from aqt_connector.exceptions import AuthenticationError, TokenValidationError
+from tests.commit.domain.stdout_spy import StdoutSpy
 
 
 class AuthAdapterSpyAlwaysAuthenticatesImmediately(Auth0Adapter):
@@ -83,20 +83,6 @@ class AccessTokenVerifierAlwaysRejects(AccessTokenVerifier):
 
     def verify_access_token(self, access_token):
         raise TokenValidationError
-
-
-class StdoutSpy(StringIO):
-    def __init__(self, initial_value: Optional[str] = "", newline: Optional[str] = "\n") -> None:
-        self.output: list[str] = []
-        super().__init__(initial_value, newline)
-
-    def write(self, s):
-        self.output.append(s)
-        return super().write(s)
-
-    def writelines(self, lines):
-        self.output += lines
-        return super().writelines(lines)
 
 
 def test_it_displays_the_verification_uri_and_user_code() -> None:
