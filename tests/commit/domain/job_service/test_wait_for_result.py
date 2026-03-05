@@ -192,3 +192,18 @@ def test_it_raises_on_non_transient_errors(exception_type: type[Exception]) -> N
 
     with pytest.raises(exception_type):
         service.wait_for_result("some-token", uuid4(), wait=wait_mock)
+
+
+def test_it_calls_report_state_if_set() -> None:
+    """It should report the state if the callable is provided."""
+    adapter_spy = ArnicaAdapterSpy()
+    service = JobService(adapter_spy)
+
+    reported_state = None
+    def test_function(state: JobState) -> None:
+        nonlocal reported_state
+        reported_state = state
+
+    service.wait_for_result("some-token", uuid4(), report_state=test_function)
+
+    assert isinstance(reported_state, RRFinished)
