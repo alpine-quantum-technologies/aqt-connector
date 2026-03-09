@@ -83,7 +83,7 @@ def wait_for_final_state(
             query_interval_seconds=query_interval_seconds,
             max_attempts=max_attempts,
             out=out,
-            report_state=report_state
+            report_state=report_state,
         )
 
     # Token to refresh as needed
@@ -95,7 +95,7 @@ def wait_for_final_state(
                 query_interval_seconds=query_interval_seconds,
                 max_attempts=max_attempts,
                 out=out,
-                report_state=report_state
+                report_state=report_state,
             )
         except NotAuthenticatedError:
             refreshed = app.auth_service.get_or_refresh_access_token(app.config.store_access_token)
