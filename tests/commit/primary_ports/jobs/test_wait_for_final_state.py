@@ -337,7 +337,7 @@ def test_it_handles_multiple_sequential_token_expiries_and_retries_until_success
     assert app.auth_service.token_fetch_count == 3  # initial + 2 retries
 
 
-@pytest.mark.parametrize("api_token", ["I am a toke", None])
+@pytest.mark.parametrize("api_token", ["I am a token", None])
 def test_it_passes_report_state_callable_to_job_service(api_token: Union[str, None]) -> None:
     """It should pass the report_state callable to the job service."""
 
