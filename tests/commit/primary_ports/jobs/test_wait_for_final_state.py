@@ -1,7 +1,7 @@
 import sys
 import time
 from collections.abc import Callable
-from typing import Optional, TextIO, cast
+from typing import Optional, TextIO, Union, cast
 from uuid import UUID, uuid4
 
 import pytest
@@ -338,7 +338,7 @@ def test_it_handles_multiple_sequential_token_expiries_and_retries_until_success
 
 
 @pytest.mark.parametrize("api_token", ["I am a toke", None])
-def test_it_passes_report_state_callable_to_job_service(api_token: str | None) -> None:
+def test_it_passes_report_state_callable_to_job_service(api_token: Union[str, None]) -> None:
     """It should pass the report_state callable to the job service."""
 
     class JobServiceDouble(JobServiceSpy):
