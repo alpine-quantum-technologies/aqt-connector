@@ -11,7 +11,7 @@ from aqt_connector._application.jobs import wait_for_final_state
 from aqt_connector._domain.auth_service import AuthService
 from aqt_connector._domain.job_service import JobService
 from aqt_connector.exceptions import InvalidJobIDError, JobNotFoundError, NotAuthenticatedError, UnknownServerError
-from aqt_connector.models.arnica.response_bodies.jobs import FinalJobState, JobState, RRCancelled, RROngoing, RRQueued
+from aqt_connector.models.arnica.response_bodies.jobs import FinalJobState, JobState, RRCancelled, RRQueued
 from tests.commit.domain.stdout_spy import StdoutSpy
 
 
@@ -336,6 +336,7 @@ def test_it_handles_multiple_sequential_token_expiries_and_retries_until_success
     assert final_state == RRCancelled()
     assert app.auth_service.token_fetch_count == 3  # initial + 2 retries
 
+
 @pytest.mark.parametrize("api_token", ["I am a toke", None])
 def test_it_passes_report_state_callable_to_job_service(api_token: str | None) -> None:
     """It should pass the report_state callable to the job service."""
@@ -362,10 +363,10 @@ def test_it_passes_report_state_callable_to_job_service(api_token: str | None) -
     app.job_service = JobServiceDouble()
 
     reported_state = None
+
     def test_function(state: JobState) -> None:
         nonlocal reported_state
         reported_state = state
-        
 
     wait_for_final_state(app, uuid4(), report_state=test_function, api_token=api_token)
 

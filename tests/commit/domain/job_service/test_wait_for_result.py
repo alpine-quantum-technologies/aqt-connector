@@ -200,6 +200,7 @@ def test_it_calls_report_state_if_set() -> None:
     service = JobService(adapter_spy)
 
     reported_state = None
+
     def test_function(state: JobState) -> None:
         nonlocal reported_state
         reported_state = state
