@@ -341,6 +341,8 @@ def test_it_handles_multiple_sequential_token_expiries_and_retries_until_success
 def test_it_passes_report_state_callable_to_job_service(api_token: Union[str, None]) -> None:
     """It should pass the report_state callable to the job service."""
 
+    expected_state = RRCancelled()
+
     class JobServiceDouble(JobServiceSpy):
         def wait_for_result(
             self,
@@ -355,8 +357,8 @@ def test_it_passes_report_state_callable_to_job_service(api_token: Union[str, No
         ) -> FinalJobState:
             self.passed_callable = report_state
             if report_state:
-                report_state(RRCancelled())
-            return RRCancelled()
+                report_state(expected_state)
+            return expected_state
 
     app = ArnicaApp(ArnicaConfig())
     app.auth_service = AuthServiceSpy()
@@ -371,4 +373,4 @@ def test_it_passes_report_state_callable_to_job_service(api_token: Union[str, No
     wait_for_final_state(app, uuid4(), report_state=test_function, api_token=api_token)
 
     assert app.job_service.passed_callable == test_function
-    assert isinstance(reported_state, RRCancelled)
+    assert reported_state is expected_state
