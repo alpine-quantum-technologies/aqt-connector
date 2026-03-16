@@ -11,7 +11,7 @@ from aqt_connector._application.jobs import wait_for_final_state
 from aqt_connector._domain.auth_service import AuthService
 from aqt_connector._domain.job_service import JobService
 from aqt_connector.exceptions import InvalidJobIDError, JobNotFoundError, NotAuthenticatedError, UnknownServerError
-from aqt_connector.models.arnica.response_bodies.jobs import FinalJobState, JobState, RRCancelled, RRQueued
+from aqt_connector.models.arnica.response_bodies.jobs import FinalJobState, JobState, NonFinalJobState, RRCancelled, RROngoing, RRQueued
 from tests.commit.domain.stdout_spy import StdoutSpy
 
 
@@ -49,7 +49,7 @@ class JobServiceSpy(JobService):
         wait: Callable[[float], None] = time.sleep,
         max_attempts: int = 600,
         out: TextIO = sys.stdout,
-        report_state: Optional[Callable[[JobState], None]] = None,
+        report_state: Optional[Callable[[NonFinalJobState], None]] = None,
     ) -> FinalJobState:
         self.given_token = token
         self.requested_job_id = job_id
@@ -159,7 +159,7 @@ def test_it_retries_after_not_authenticated_once_by_refreshing_token_and_succeed
             wait: Callable[[float], None] = time.sleep,
             max_attempts: int = 600,
             out: TextIO = sys.stdout,
-            report_state: Optional[Callable[[JobState], None]] = None,
+            report_state: Optional[Callable[[NonFinalJobState], None]] = None,
         ) -> FinalJobState:
             if self.call_count == 0:
                 self.call_count = 1
@@ -196,7 +196,7 @@ def test_it_propagates_not_authenticated_error_when_refresh_returns_none() -> No
             wait: Callable[[float], None] = time.sleep,
             max_attempts: int = 600,
             out: TextIO = sys.stdout,
-            report_state: Optional[Callable[[JobState], None]] = None,
+            report_state: Optional[Callable[[NonFinalJobState], None]] = None,
         ) -> FinalJobState:
             raise NotAuthenticatedError
 
@@ -225,7 +225,7 @@ def test_it_propagates_not_authenticated_error_when_refresh_returns_same_token()
             wait: Callable[[float], None] = time.sleep,
             max_attempts: int = 600,
             out: TextIO = sys.stdout,
-            report_state: Optional[Callable[[JobState], None]] = None,
+            report_state: Optional[Callable[[NonFinalJobState], None]] = None,
         ) -> FinalJobState:
             raise NotAuthenticatedError
 
@@ -250,7 +250,7 @@ def test_it_does_not_attempt_refresh_when_static_api_token_and_not_authenticated
             wait: Callable[[float], None] = time.sleep,
             max_attempts: int = 600,
             out: TextIO = sys.stdout,
-            report_state: Optional[Callable[[JobState], None]] = None,
+            report_state: Optional[Callable[[NonFinalJobState], None]] = None,
         ) -> FinalJobState:
             raise NotAuthenticatedError
 
@@ -287,7 +287,7 @@ def test_it_propagates_other_exceptions_from_job_service(exception_type: type[Ex
             wait: Callable[[float], None] = time.sleep,
             max_attempts: int = 600,
             out: TextIO = sys.stdout,
-            report_state: Optional[Callable[[JobState], None]] = None,
+            report_state: Optional[Callable[[NonFinalJobState], None]] = None,
         ) -> FinalJobState:
             raise exception_type()
 
@@ -320,7 +320,7 @@ def test_it_handles_multiple_sequential_token_expiries_and_retries_until_success
             wait: Callable[[float], None] = time.sleep,
             max_attempts: int = 600,
             out: TextIO = sys.stdout,
-            report_state: Optional[Callable[[JobState], None]] = None,
+            report_state: Optional[Callable[[NonFinalJobState], None]] = None,
         ) -> FinalJobState:
             if self.call_count < 2:
                 self.call_count += 1
@@ -341,7 +341,7 @@ def test_it_handles_multiple_sequential_token_expiries_and_retries_until_success
 def test_it_passes_report_state_callable_to_job_service(api_token: Union[str, None]) -> None:
     """It should pass the report_state callable to the job service."""
 
-    expected_state = RRCancelled()
+    expected_state = RROngoing(finished_count=1)
 
     class JobServiceDouble(JobServiceSpy):
         def wait_for_result(
@@ -353,12 +353,12 @@ def test_it_passes_report_state_callable_to_job_service(api_token: Union[str, No
             wait: Callable[[float], None] = time.sleep,
             max_attempts: int = 600,
             out: TextIO = sys.stdout,
-            report_state: Optional[Callable[[JobState], None]] = None,
+            report_state: Optional[Callable[[NonFinalJobState], None]] = None,
         ) -> FinalJobState:
             self.passed_callable = report_state
             if report_state:
                 report_state(expected_state)
-            return expected_state
+            return RRCancelled()
 
     app = ArnicaApp(ArnicaConfig())
     app.auth_service = AuthServiceSpy()
