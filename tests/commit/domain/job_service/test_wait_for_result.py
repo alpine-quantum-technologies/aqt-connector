@@ -1,3 +1,4 @@
+from typing import Optional
 from uuid import UUID, uuid4
 
 import pytest
@@ -11,7 +12,15 @@ from aqt_connector.exceptions import (
     RequestError,
     UnknownServerError,
 )
-from aqt_connector.models.arnica.response_bodies.jobs import JobState, RRFinished, RRQueued
+from aqt_connector.models.arnica.response_bodies.jobs import (
+    FinalJobState,
+    JobState,
+    RRCancelled,
+    RRError,
+    RRFinished,
+    RROngoing,
+    RRQueued,
+)
 from tests.commit.domain.stdout_spy import StdoutSpy
 
 
@@ -30,14 +39,19 @@ class ArnicaAdapterSpy(ArnicaAdapter):
 class ArnicaAdapterFinishingSpy(ArnicaAdapterSpy):
     """A spy for the ArnicaAdapter that simulates a job finishing after several polls."""
 
-    def __init__(self) -> None:
+    def __init__(self, finished_state: Optional[JobState] = None) -> None:
         super().__init__()
         self.queue_for_calls = 2
+        self.finished_state: JobState = RRFinished(result={0: [[0, 0]]})
+        if finished_state:
+            self.finished_state = finished_state
 
     def fetch_job_state(self, token: str, job_id: UUID) -> JobState:
         self.fetch_job_state_called_with.append((token, job_id))
-        if len(self.fetch_job_state_called_with) <= self.queue_for_calls:
+        if len(self.fetch_job_state_called_with) == 1:
             return RRQueued()
+        elif len(self.fetch_job_state_called_with) <= self.queue_for_calls:
+            return RROngoing(finished_count=0)
         else:
             return RRFinished(result={0: [[0, 0]]})
 
@@ -194,17 +208,20 @@ def test_it_raises_on_non_transient_errors(exception_type: type[Exception]) -> N
         service.wait_for_result("some-token", uuid4(), wait=wait_mock)
 
 
-def test_it_calls_report_state_if_set_and_state_not_finished() -> None:
+@pytest.mark.parametrize("final_state", [RRFinished, RRError, RRCancelled])
+def test_it_calls_report_state_if_set(final_state: FinalJobState) -> None:
     """It should report the state if the callable is provided."""
-    adapter_spy = ArnicaAdapterFinishingSpy()
+    adapter_spy = ArnicaAdapterFinishingSpy(finished_state=final_state)
     service = JobService(adapter_spy)
 
-    reported_state = None
+    reported_states = []
 
     def test_function(state: JobState) -> None:
-        nonlocal reported_state
-        reported_state = state
+        nonlocal reported_states
+        reported_states.append(state)
 
-    service.wait_for_result("some-token", uuid4(), report_state=test_function)
+    service.wait_for_result("some-token", uuid4(), report_state=test_function, query_interval_seconds=0.001)
 
-    assert isinstance(reported_state, RRQueued)
+    assert len(reported_states) == 2
+    assert isinstance(reported_states[0], RRQueued)
+    assert isinstance(reported_states[1], RROngoing)

@@ -4,7 +4,7 @@ from uuid import UUID
 
 from aqt_connector._arnica_app import ArnicaApp
 from aqt_connector.exceptions import NotAuthenticatedError
-from aqt_connector.models.arnica.response_bodies.jobs import FinalJobState, JobState
+from aqt_connector.models.arnica.response_bodies.jobs import FinalJobState, JobState, NonFinalJobState
 
 
 def fetch_job_state(app: ArnicaApp, job_id: UUID, *, api_token: Optional[str] = None) -> JobState:
@@ -42,7 +42,7 @@ def wait_for_final_state(
     query_interval_seconds: float = 1.0,
     max_attempts: int = 600,
     out: TextIO = sys.stdout,
-    report_state: Optional[Callable[[JobState], None]] = None,
+    report_state: Optional[Callable[[NonFinalJobState], None]] = None,
 ) -> FinalJobState:
     """Wait for a job to reach a final state.
 
@@ -57,7 +57,7 @@ def wait_for_final_state(
         query_interval_seconds (float, optional): The base interval between job state queries. Defaults to 1.0.
         max_attempts (int, optional): The maximum number of attempts to query the job state. Defaults to 600.
         out (TextIO, optional): text stream to send output to. Defaults to sys.stdout.
-        report_state (Callable[[JobState], None], optional): Callable to report state.
+        report_state (Callable[[NonFinalJobState], None], optional): Callable to report state.
 
     Raises:
         NotAuthenticatedError: if the user is not authenticated and no access token is available.
