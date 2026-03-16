@@ -78,10 +78,10 @@ class JobService:
             attempts += 1
             try:
                 job_state = self.arnica.fetch_job_state(token, job_id)
-                if report_state:
-                    report_state(job_state)
                 if job_state.is_finished():
                     return cast(FinalJobState, job_state)
+                if report_state:
+                    report_state(job_state)
 
             except RequestError as err:
                 out.write(f"Transient ({type(err).__name__}) error encountered while fetching job state: {err}.\n")
