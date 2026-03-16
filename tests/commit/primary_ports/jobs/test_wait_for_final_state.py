@@ -11,7 +11,14 @@ from aqt_connector._application.jobs import wait_for_final_state
 from aqt_connector._domain.auth_service import AuthService
 from aqt_connector._domain.job_service import JobService
 from aqt_connector.exceptions import InvalidJobIDError, JobNotFoundError, NotAuthenticatedError, UnknownServerError
-from aqt_connector.models.arnica.response_bodies.jobs import FinalJobState, JobState, NonFinalJobState, RRCancelled, RROngoing, RRQueued
+from aqt_connector.models.arnica.response_bodies.jobs import (
+    FinalJobState,
+    JobState,
+    NonFinalJobState,
+    RRCancelled,
+    RROngoing,
+    RRQueued,
+)
 from tests.commit.domain.stdout_spy import StdoutSpy
 
 
