@@ -194,9 +194,9 @@ def test_it_raises_on_non_transient_errors(exception_type: type[Exception]) -> N
         service.wait_for_result("some-token", uuid4(), wait=wait_mock)
 
 
-def test_it_calls_report_state_if_set() -> None:
+def test_it_calls_report_state_if_set_and_state_not_finished() -> None:
     """It should report the state if the callable is provided."""
-    adapter_spy = ArnicaAdapterSpy()
+    adapter_spy = ArnicaAdapterFinishingSpy()
     service = JobService(adapter_spy)
 
     reported_state = None
@@ -207,4 +207,4 @@ def test_it_calls_report_state_if_set() -> None:
 
     service.wait_for_result("some-token", uuid4(), report_state=test_function)
 
-    assert isinstance(reported_state, RRFinished)
+    assert isinstance(reported_state, RRQueued)
