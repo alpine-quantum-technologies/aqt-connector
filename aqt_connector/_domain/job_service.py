@@ -2,12 +2,12 @@ import random
 import sys
 import time
 from collections.abc import Callable
-from typing import TextIO, cast
+from typing import Optional, TextIO, cast
 from uuid import UUID
 
 from aqt_connector._infrastructure.arnica_adapter import ArnicaAdapter
 from aqt_connector.exceptions import RequestError
-from aqt_connector.models.arnica.response_bodies.jobs import FinalJobState, JobState
+from aqt_connector.models.arnica.response_bodies.jobs import FinalJobState, JobState, NonFinalJobState
 
 
 class JobService:
@@ -45,6 +45,7 @@ class JobService:
         wait: Callable[[float], None] = time.sleep,
         max_attempts: int = 600,  # 10 minutes (average)
         out: TextIO = sys.stdout,
+        report_state: Optional[Callable[[NonFinalJobState], None]] = None,
     ) -> FinalJobState:
         """Waits for the job with the given ID to complete and returns its final state.
 
@@ -59,6 +60,7 @@ class JobService:
             wait (callable, optional): A callable that takes a duration in seconds to wait. Defaults to time.sleep.
             max_attempts (int, optional): The maximum number of attempts to query the job state. Defaults to 600.
             out (TextIO, optional): text stream to send output to. Defaults to sys.stdout.
+            report_state (Callable[[NonFinalJobState], None], optional): Callable to report state.
 
         Raises:
             NotAuthenticatedError: If the provided token is invalid or expired.
@@ -78,6 +80,8 @@ class JobService:
                 job_state = self.arnica.fetch_job_state(token, job_id)
                 if job_state.is_finished():
                     return cast(FinalJobState, job_state)
+                if report_state:
+                    report_state(cast(NonFinalJobState, job_state))
 
             except RequestError as err:
                 out.write(f"Transient ({type(err).__name__}) error encountered while fetching job state: {err}.\n")
