@@ -11,10 +11,19 @@ env:
   TARGET_PYTHON: ${{ vars.TARGET_PYTHON }}
 
 jobs:
+  validate: 
+    name: validate workflow variables
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate required workflow variables
+        run: |
+          test -n "${UV_VERSION}" || { echo "UV_VERSION is not set"; exit 1; }
+          test -n "${TARGET_PYTHON}" || { echo "TARGET_PYTHON is not set"; exit 1; }
+
   test:
     name: test-python${{ matrix.python-version }}-${{ matrix.os }}
-
     runs-on: ${{ matrix.os }}
+    needs: validate
 
     strategy:
       matrix:

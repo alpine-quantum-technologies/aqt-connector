@@ -16,6 +16,11 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
+      - name: Validate required workflow variables
+        run: |
+          test -n "${UV_VERSION}" || { echo "UV_VERSION is not set"; exit 1; }
+          test -n "${TARGET_PYTHON}" || { echo "TARGET_PYTHON is not set"; exit 1; }
+
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
