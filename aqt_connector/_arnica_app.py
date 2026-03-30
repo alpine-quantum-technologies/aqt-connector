@@ -42,8 +42,10 @@ class ArnicaApp:
 
     def close(self) -> None:
         """Closes all underlying HTTP clients and releases their connection pools."""
-        self._auth0_adapter.close()
-        self._arnica_adapter.close()
+        try:
+            self._auth0_adapter.close()
+        finally:
+            self._arnica_adapter.close()
 
     def __enter__(self) -> Self:
         return self
