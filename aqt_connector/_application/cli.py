@@ -25,10 +25,9 @@ def log_in_command(
     if client_secret:
         config.client_secret = client_secret
 
-    arnica = ArnicaApp(config)
-
-    try:
-        log_in(arnica)
-        print("Authentication complete")
-    except AuthenticationError:
-        typer.echo("Authentication failed! Please check your credentials and try again.")
+    with ArnicaApp(config) as arnica:
+        try:
+            log_in(arnica)
+            print("Authentication complete")
+        except AuthenticationError:
+            typer.echo("Authentication failed! Please check your credentials and try again.")
