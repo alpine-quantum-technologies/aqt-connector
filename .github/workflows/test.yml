@@ -1,21 +1,29 @@
 name: Test
 on:
   push:
-    branches: [ "main" ]
+    branches: [main]
   pull_request:
-    branches:  [ "main" ]
-  workflow_dispatch:
+    branches: [main]
 
 env:
-  PYTHONIOENCODING: utf-8
-  UV_VERSION: "0.7.2"
-  TARGET_PYTHON: "3.12"
+  PYTHONUTF8: 1
+  UV_VERSION: ${{ vars.UV_VERSION }}
+  TARGET_PYTHON: ${{ vars.TARGET_PYTHON }}
 
 jobs:
+  validate: 
+    name: validate workflow variables
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate required workflow variables
+        run: |
+          test -n "${UV_VERSION}" || { echo "UV_VERSION is not set"; exit 1; }
+          test -n "${TARGET_PYTHON}" || { echo "TARGET_PYTHON is not set"; exit 1; }
+
   test:
     name: test-python${{ matrix.python-version }}-${{ matrix.os }}
-
     runs-on: ${{ matrix.os }}
+    needs: validate
 
     strategy:
       matrix:
@@ -126,32 +134,3 @@ jobs:
           AUTH0_TEST_CLIENT_CREDENTIALS_AUDIENCE: ${{ secrets.AUTH0_TEST_CLIENT_CREDENTIALS_AUDIENCE }}
           AUTH0_TEST_DEVICE_FLOW_USER_EMAIL: ${{ secrets.AUTH0_TEST_DEVICE_FLOW_USER_EMAIL }}
           AUTH0_TEST_DEVICE_FLOW_USER_PASSWORD: ${{ secrets.AUTH0_TEST_DEVICE_FLOW_USER_PASSWORD }}
-
-  build:
-    needs: [test, integration_test]
-    runs-on: ubuntu-latest
-    if: ${{ needs.integration_test.result == 'success' || needs.integration_test.result == 'skipped' }}
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Python ${{ env.TARGET_PYTHON }}
-        uses: actions/setup-python@v5
-        with:
-            python-version: ${{ env.TARGET_PYTHON }}
-
-      - name: Install uv ${{ env.UV_VERSION }}
-        uses: astral-sh/setup-uv@v5
-        with:
-          version: ${{ env.UV_VERSION }}
-
-      - name: Install all dependencies
-        run: uv sync --all-groups
-
-      - name: Build release distributions
-        run: uv build
-
-      - name: Upload distributions
-        uses: actions/upload-artifact@v4
-        with:
-          name: release-dists
-          path: dist/

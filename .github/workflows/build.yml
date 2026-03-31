@@ -1,0 +1,48 @@
+name: Build
+
+on:
+  workflow_run:
+    workflows: [Test]
+    types: [completed]
+    branches: [main]
+
+env:
+  PYTHONUTF8: 1
+  UV_VERSION: ${{ vars.UV_VERSION }}
+  TARGET_PYTHON: ${{ vars.TARGET_PYTHON }}
+
+jobs:
+  build:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate required workflow variables
+        run: |
+          test -n "${UV_VERSION}" || { echo "UV_VERSION is not set"; exit 1; }
+          test -n "${TARGET_PYTHON}" || { echo "TARGET_PYTHON is not set"; exit 1; }
+
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Set up Python ${{ env.TARGET_PYTHON }}
+        uses: actions/setup-python@v5
+        with:
+            python-version: ${{ env.TARGET_PYTHON }}
+
+      - name: Install uv ${{ env.UV_VERSION }}
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: ${{ env.UV_VERSION }}
+
+      - name: Install all dependencies
+        run: uv sync --all-groups
+
+      - name: Build release distributions
+        run: uv build
+
+      - name: Upload distributions
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-dists
+          path: dist/
