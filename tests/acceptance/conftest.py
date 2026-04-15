@@ -59,7 +59,7 @@ def auth_server(jwks_document: dict) -> Generator[HTTPServer, None, None]:
     Individual tests may register additional routes (e.g. ``/oauth/token``)
     before exercising the library.
     """
-    server = HTTPServer(host="127.0.0.1")
+    server = HTTPServer(host="127.0.0.1", port=0)
     server.start()
     server.expect_request("/.well-known/jwks.json").respond_with_json(jwks_document)
     yield server
@@ -76,7 +76,7 @@ def arnica_server() -> Generator[HTTPServer, None, None]:
     Individual tests register routes (e.g. ``/v1/result/{job_id}``) before
     exercising the library.
     """
-    server = HTTPServer(host="127.0.0.1")
+    server = HTTPServer(host="127.0.0.1", port=0)
     server.start()
     yield server
     try:
