@@ -25,6 +25,10 @@ class ArnicaAdapter:
         self._base_url = base_url
         self._http_client = httpx.Client()
 
+    def close(self) -> None:
+        """Closes the underlying HTTP client and releases its connection pool."""
+        self._http_client.close()
+
     def fetch_job_state(self, token: str, job_id: UUID) -> JobState:
         """Fetches the state of a job from the Arnica API.
 

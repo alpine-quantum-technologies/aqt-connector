@@ -28,6 +28,10 @@ class Auth0Adapter:
         self.audience = config.audience
         self._http_client = httpx.Client()
 
+    def close(self) -> None:
+        """Closes the underlying HTTP client and releases its connection pool."""
+        self._http_client.close()
+
     def fetch_token_with_client_credentials(self, client_id: str, client_secret: str) -> str:
         """Fetches an access token using the client credentials flow.
 

@@ -1,3 +1,8 @@
+from contextlib import ExitStack
+from typing import Optional
+
+from typing_extensions import Self
+
 from aqt_connector._domain.auth_service import AuthService
 from aqt_connector._domain.job_service import JobService
 from aqt_connector._domain.oidc_service import OIDCService
@@ -29,7 +34,30 @@ class ArnicaApp:
             )
         )
 
-        self.oidc_service = OIDCService(Auth0Adapter(config.oidc_config), token_verifier)
-        self.auth_service = AuthService(token_verifier, TokenRepository(config._app_dir), self.oidc_service)
+        with ExitStack() as stack:
+            self._auth0_adapter = Auth0Adapter(config.oidc_config)
+            stack.callback(self._auth0_adapter.close)
+            self._arnica_adapter = ArnicaAdapter(self.config.arnica_url)
+            stack.callback(self._arnica_adapter.close)
 
-        self.job_service = JobService(ArnicaAdapter(self.config.arnica_url))
+            self.oidc_service = OIDCService(self._auth0_adapter, token_verifier)
+            self.auth_service = AuthService(token_verifier, TokenRepository(config._app_dir), self.oidc_service)
+            self.job_service = JobService(self._arnica_adapter)
+
+            stack.pop_all()
+
+    def close(self) -> None:
+        """Closes all underlying HTTP clients and releases their connection pools."""
+        try:
+            self._auth0_adapter.close()
+        finally:
+            self._arnica_adapter.close()
+
+    def __enter__(self) -> Self:
+        return self
+
+    def __exit__(
+        self, exc_type: Optional[type], exc_value: Optional[BaseException], traceback: Optional[object]
+    ) -> Optional[bool]:
+        self.close()
+        return None
