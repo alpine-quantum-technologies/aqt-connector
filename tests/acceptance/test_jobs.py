@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import uuid
-from collections.abc import Callable
 
 import pytest
 from pytest_httpserver import HTTPServer
@@ -12,13 +11,13 @@ from aqt_connector import fetch_job_state, wait_for_final_state
 from aqt_connector._arnica_app import ArnicaApp
 from aqt_connector.exceptions import JobNotFoundError, NotAuthenticatedError
 from aqt_connector.models.arnica.response_bodies.jobs import RRFinished, RRQueued
-from tests.acceptance.conftest import job_state_response_json
+from tests.acceptance.conftest import JWTFactory, job_state_response_json
 
 A_JOB_ID = uuid.UUID("00000000-0000-0000-0000-000000000001")
 
 
 def test_fetch_queued_job_returns_queued_state(
-    arnica_app: ArnicaApp, arnica_server: HTTPServer, make_jwt: Callable[[], str]
+    arnica_app: ArnicaApp, arnica_server: HTTPServer, make_jwt: JWTFactory
 ) -> None:
     """fetch_job_state returns a queued state for a job that is waiting to run.
 
@@ -41,7 +40,7 @@ def test_fetch_queued_job_returns_queued_state(
 
 
 def test_fetch_finished_job_returns_results(
-    arnica_app: ArnicaApp, arnica_server: HTTPServer, make_jwt: Callable[[], str]
+    arnica_app: ArnicaApp, arnica_server: HTTPServer, make_jwt: JWTFactory
 ) -> None:
     """fetch_job_state returns the measurement results for a completed job."""
     api_token = make_jwt()
@@ -69,7 +68,7 @@ def test_fetch_job_state_raises_not_authenticated_when_no_token(arnica_app: Arni
 
 
 def test_fetch_unknown_job_raises_job_not_found(
-    arnica_app: ArnicaApp, arnica_server: HTTPServer, make_jwt: Callable[[], str]
+    arnica_app: ArnicaApp, arnica_server: HTTPServer, make_jwt: JWTFactory
 ) -> None:
     """fetch_job_state raises JobNotFoundError when the API returns 404."""
     unknown_id = uuid.UUID("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee")
@@ -82,7 +81,7 @@ def test_fetch_unknown_job_raises_job_not_found(
 
 
 def test_wait_for_final_state_polls_until_job_finishes(
-    arnica_app: ArnicaApp, arnica_server: HTTPServer, make_jwt: Callable[[], str]
+    arnica_app: ArnicaApp, arnica_server: HTTPServer, make_jwt: JWTFactory
 ) -> None:
     """wait_for_final_state keeps polling until the job reaches a final state."""
     api_token = make_jwt()
@@ -104,7 +103,7 @@ def test_wait_for_final_state_polls_until_job_finishes(
 
 
 def test_wait_for_final_state_raises_timeout_when_max_attempts_exceeded(
-    arnica_app: ArnicaApp, arnica_server: HTTPServer, make_jwt: Callable[[], str]
+    arnica_app: ArnicaApp, arnica_server: HTTPServer, make_jwt: JWTFactory
 ) -> None:
     """wait_for_final_state raises TimeoutError after exhausting max attempts."""
     api_token = make_jwt()

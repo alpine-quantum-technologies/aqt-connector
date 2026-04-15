@@ -6,16 +6,11 @@ import io
 import json
 from pathlib import Path
 
-from typing_extensions import Protocol
 from werkzeug import Request, Response
 
 from aqt_connector import get_access_token, log_in
 from aqt_connector._arnica_app import ArnicaApp
-from tests.acceptance.conftest import TEST_DEVICE_CLIENT_ID
-
-
-class JWTFactory(Protocol):
-    def __call__(self, audience: str | None = None) -> str: ...
+from tests.acceptance.conftest import TEST_DEVICE_CLIENT_ID, JWTFactory
 
 
 def test_already_authenticated_user_gets_stored_token(

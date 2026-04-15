@@ -9,12 +9,15 @@ from __future__ import annotations
 
 import json
 import time
+from collections.abc import Generator
+from pathlib import Path
 from uuid import UUID
 
 import jwt as pyjwt
 import pytest
 from cryptography.hazmat.primitives.asymmetric import rsa
 from pytest_httpserver import HTTPServer
+from typing_extensions import Protocol
 
 from aqt_connector import ArnicaApp, ArnicaConfig
 from aqt_connector.models.arnica.jobs import BasicJobMetadata
@@ -24,14 +27,18 @@ TEST_KID = "acceptance-test-key"
 TEST_DEVICE_CLIENT_ID = "test-device-client-id"
 
 
+class JWTFactory(Protocol):
+    def __call__(self, audience: str = ...) -> str: ...
+
+
 @pytest.fixture(scope="session")
-def rsa_private_key():
+def rsa_private_key() -> rsa.RSAPrivateKey:
     """RSA-2048 key pair shared across all tests in the session."""
     return rsa.generate_private_key(public_exponent=65537, key_size=2048)
 
 
 @pytest.fixture(scope="session")
-def jwks_document(rsa_private_key) -> dict:
+def jwks_document(rsa_private_key: rsa.RSAPrivateKey) -> dict:
     """JWKS document exposing the public half of the test RSA key.
 
     Produced via PyJWT so it round-trips with auth0-python's
@@ -44,7 +51,7 @@ def jwks_document(rsa_private_key) -> dict:
 
 
 @pytest.fixture()
-def auth_server(jwks_document):
+def auth_server(jwks_document: dict) -> Generator[HTTPServer, None, None]:
     """Minimal fake Auth0 server.
 
     Permanently serves ``/.well-known/jwks.json`` so that
@@ -63,7 +70,7 @@ def auth_server(jwks_document):
 
 
 @pytest.fixture()
-def arnica_server():
+def arnica_server() -> Generator[HTTPServer, None, None]:
     """Minimal fake Arnica REST API server.
 
     Individual tests register routes (e.g. ``/v1/result/{job_id}``) before
@@ -79,7 +86,7 @@ def arnica_server():
 
 
 @pytest.fixture()
-def make_jwt(rsa_private_key, auth_server):
+def make_jwt(rsa_private_key: rsa.RSAPrivateKey, auth_server: HTTPServer) -> JWTFactory:
     """Factory that mints RS256 JWTs compatible with the local test servers.
 
     Tokens are signed with ``rsa_private_key``, whose public counterpart is
@@ -112,7 +119,7 @@ def make_jwt(rsa_private_key, auth_server):
 
 
 @pytest.fixture()
-def arnica_app(auth_server, arnica_server, tmp_path):
+def arnica_app(auth_server: HTTPServer, arnica_server: HTTPServer, tmp_path: Path) -> Generator[ArnicaApp, None, None]:
     """``ArnicaApp`` whose external calls are routed to the local test servers.
 
     All production library code (application, domain, infrastructure) runs
