@@ -52,10 +52,10 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     steps:
-      - name: Download release distributions
-        uses: actions/download-artifact@v4
+
+      - uses: actions/checkout@v4
         with:
-          name: release-dists
+          ref: ${{ github.event.workflow_run.head_sha }}
 
       - name: Install uv ${{ env.UV_VERSION }}
         uses: astral-sh/setup-uv@v5
@@ -64,6 +64,11 @@ jobs:
 
       - name: Install all dependencies
         run: uv sync --group test
+
+      - name: Download release distributions
+        uses: actions/download-artifact@v4
+        with:
+          name: release-dists
 
       - name: Install release distributions
         run: uv pip install dist/*.whl
