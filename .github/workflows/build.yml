@@ -46,3 +46,27 @@ jobs:
         with:
           name: release-dists
           path: dist/
+
+  acceptance:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Download release distributions
+        uses: actions/download-artifact@v4
+        with:
+          name: release-dists
+
+      - name: Install uv ${{ env.UV_VERSION }}
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: ${{ env.UV_VERSION }}
+
+      - name: Install all dependencies
+        run: uv sync --group test
+
+      - name: Install release distributions
+        run: uv pip install dist/*.whl
+
+      - name: Run acceptance tests
+        run: uv run pytest tests/acceptance
