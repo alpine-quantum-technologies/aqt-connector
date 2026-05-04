@@ -63,15 +63,19 @@ jobs:
           version: ${{ env.UV_VERSION }}
 
       - name: Install all dependencies
-        run: uv sync --group test
+        run: uv sync --group test --no-install-project
 
       - name: Download release distributions
         uses: actions/download-artifact@v4
         with:
           name: release-dists
+          path: dist/
 
       - name: Install release distributions
-        run: uv pip install dist/*.whl
+        run: |
+          ls -lah dist
+          test -n "$(find dist -maxdepth 1 -name '*.whl' -print -quit)"
+          uv pip install dist/*.whl
 
       - name: Run acceptance tests
         run: uv run pytest tests/acceptance
