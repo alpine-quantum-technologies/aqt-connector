@@ -17,11 +17,14 @@ class Circuit(RootModel[list[OperationModel]]):
     def ensure_measurement_at_the_end(self) -> Self:
         """Accept exactly one `Measure` instruction as last operation in the circuit."""
         operations = self.root
+        validation_error = ValueError("Need exactly one `MEASURE` operation at the end of the circuit.")
 
-        measurements_pos = [index for index, operation in enumerate(operations) if isinstance(operation.root, Measure)]
+        if not isinstance(operations[-1].root, Measure):
+            raise validation_error
 
-        if len(measurements_pos) != 1 or measurements_pos[0] != (len(operations) - 1):
-            raise ValueError("Need exactly one `MEASURE` operation at the end of the circuit.")
+        for operation in operations[:-1]:
+            if isinstance(operation.root, Measure):
+                raise validation_error
 
         return self
 
