@@ -93,8 +93,8 @@ jobs:
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
 
-      - name: Check if version should be released
-        id: release_check
+      - name: Check if version should be published to PyPI
+        id: pypi_check
         shell: bash
         run: |
           current_version="$(python - <<'PY'
@@ -110,14 +110,35 @@ jobs:
             "https://pypi.org/pypi/aqt-connector/${current_version}/json")
 
           if [ "$http_status" = "200" ]; then
-            echo "::notice::Version ${current_version} is already published on PyPI. Skipping release."
-            echo "should_release=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Version ${current_version} is already published on PyPI. Skipping PyPI publish."
+            echo "should_publish=false" >> "$GITHUB_OUTPUT"
           elif [ "$http_status" = "404" ]; then
-            echo "Version ${current_version} is not yet on PyPI. Proceeding with release."
-            echo "should_release=true" >> "$GITHUB_OUTPUT"
+            echo "Version ${current_version} is not yet on PyPI. Proceeding with publish."
+            echo "should_publish=true" >> "$GITHUB_OUTPUT"
           else
             echo "::error::Unexpected HTTP status ${http_status} when checking PyPI for version ${current_version}."
             exit 1
+          fi
+
+      - name: Check if GitHub tag and release should be created
+        id: github_release_check
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          version="${{ steps.pypi_check.outputs.current_version }}"
+          tag="v${version}"
+
+          remote_tag=$(git ls-remote --tags origin "refs/tags/${tag}")
+          if [ -n "$remote_tag" ]; then
+            echo "::notice::Tag ${tag} already exists on remote. Skipping tag/release creation."
+            echo "should_create_tag=false" >> "$GITHUB_OUTPUT"
+          elif gh release view "${tag}" > /dev/null 2>&1; then
+            echo "::notice::GitHub release ${tag} already exists. Skipping tag/release creation."
+            echo "should_create_tag=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "Tag and release ${tag} do not exist. Proceeding with creation."
+            echo "should_create_tag=true" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Download release distributions
@@ -125,26 +146,26 @@ jobs:
         with:
           name: release-dists
           path: dist/
-      
+
       - name: Publish to PyPI
-        if: steps.release_check.outputs.should_release == 'true'
+        if: steps.pypi_check.outputs.should_publish == 'true'
         uses: pypa/gh-action-pypi-publish@release/v1
 
       - name: Create git tag and GitHub release
-        if: steps.release_check.outputs.should_release == 'true'
+        if: steps.github_release_check.outputs.should_create_tag == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
-          version="${{ steps.release_check.outputs.current_version }}"
+          version="${{ steps.pypi_check.outputs.current_version }}"
           tag="v${version}"
-          
+
           # Create and push the tag
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
           git tag -a "${tag}" -m "Release ${tag}"
           git push origin "${tag}"
-          
+
           # Create GitHub release
           gh release create "${tag}" \
             --title "${tag}" \
