@@ -85,6 +85,9 @@ jobs:
     runs-on: ubuntu-latest
     environment: release
     needs: acceptance
+    permissions:
+      id-token: write  # required for trusted publishing
+      contents: write  # required to create github release and push tags
     steps:
       - uses: actions/checkout@v4
         with:
