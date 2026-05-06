@@ -4,6 +4,7 @@
 * Function to (blockingly) await for the final result of a job #13
 * Description regarding access tokens storage and expiration in README #14
 * Update dependencies #18
+* Remove support for Python 3.9, add support for Python 3.14. Update dependencies #32
 
 ## aqt-connector 0.3.0
 * Increase circuit qubit limit to <=31 #11
