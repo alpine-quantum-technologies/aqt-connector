@@ -1,5 +1,4 @@
 from contextlib import ExitStack
-from typing import Optional
 
 from typing_extensions import Self
 
@@ -56,8 +55,6 @@ class ArnicaApp:
     def __enter__(self) -> Self:
         return self
 
-    def __exit__(
-        self, exc_type: Optional[type], exc_value: Optional[BaseException], traceback: Optional[object]
-    ) -> Optional[bool]:
+    def __exit__(self, exc_type: type | None, exc_value: BaseException | None, traceback: object | None) -> bool | None:
         self.close()
         return None

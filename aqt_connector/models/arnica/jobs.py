@@ -3,7 +3,7 @@
 import uuid
 from datetime import datetime
 from enum import Enum
-from typing import Literal, Union
+from typing import Literal
 
 from pydantic import BaseModel, Field
 
@@ -48,6 +48,6 @@ class BasicJobMetadata(BaseModel):
 
     job_id: uuid.UUID = Field(description="Id that uniquely identifies the job. This is used to request results.")
     job_type: Literal[JobType.QUANTUM_CIRCUIT] = JobType.QUANTUM_CIRCUIT
-    label: Union[str, None] = None
+    label: str | None = None
     resource_id: str
     workspace_id: str

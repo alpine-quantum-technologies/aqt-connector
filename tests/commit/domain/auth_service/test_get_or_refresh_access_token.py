@@ -1,5 +1,3 @@
-from typing import Union
-
 import pytest
 
 from aqt_connector._data_types import OfflineAccessTokens
@@ -27,10 +25,10 @@ class AccessTokenVerifierAlwaysRejects(AccessTokenVerifier):
 class EmptyTokenRepository(TokenRepository):
     def __init__(self) -> None: ...
 
-    def load_access_token(self) -> Union[str, None]:
+    def load_access_token(self) -> str | None:
         return None
 
-    def load_refresh_token(self) -> Union[str, None]:
+    def load_refresh_token(self) -> str | None:
         return None
 
 
@@ -38,10 +36,10 @@ class TokenRepositoryNoRefreshToken(TokenRepository):
     def __init__(self) -> None:
         self.saved_token: str = "this_is_the_stored_token"
 
-    def load_access_token(self) -> Union[str, None]:
+    def load_access_token(self) -> str | None:
         return self.saved_token
 
-    def load_refresh_token(self) -> Union[str, None]:
+    def load_refresh_token(self) -> str | None:
         return None
 
 
@@ -49,16 +47,16 @@ class TokenRepositoryWithRefreshToken(TokenRepository):
     def __init__(self) -> None:
         self.existing_access_token: str = "this_is_the_stored_token"
         self.existing_refresh_token: str = "this_is_the_stored_refresh_token"
-        self.saved_access_token: Union[str, None] = None
-        self.saved_refresh_token: Union[str, None] = None
+        self.saved_access_token: str | None = None
+        self.saved_refresh_token: str | None = None
 
-    def load_access_token(self) -> Union[str, None]:
+    def load_access_token(self) -> str | None:
         return self.existing_access_token
 
     def save_access_token(self, token: str) -> None:
         self.saved_access_token = token
 
-    def load_refresh_token(self) -> Union[str, None]:
+    def load_refresh_token(self) -> str | None:
         return self.existing_refresh_token
 
     def save_refresh_token(self, refresh_token: str) -> None:
@@ -67,7 +65,7 @@ class TokenRepositoryWithRefreshToken(TokenRepository):
 
 class OIDCServiceAlwaysRefreshes(OIDCService):
     def __init__(self) -> None:
-        self.given_refresh_token: Union[str, None] = None
+        self.given_refresh_token: str | None = None
         self.access_token = "this-is-the-new-access-token"
         self.next_refresh_token = "this-is-the-next-refresh-token"
 

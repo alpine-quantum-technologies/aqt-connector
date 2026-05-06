@@ -1,4 +1,3 @@
-from typing import Optional
 from uuid import UUID, uuid4
 
 import pytest
@@ -19,7 +18,7 @@ class AuthServiceSpy(AuthService):
         self.was_token_stored = False
         self.fetched_token = "thisisthetoken"
 
-    def get_or_refresh_access_token(self, store: bool) -> Optional[str]:
+    def get_or_refresh_access_token(self, store: bool) -> str | None:
         self.was_token_fetched = True
         self.was_token_stored = store
         return self.fetched_token
@@ -29,8 +28,8 @@ class JobServiceSpy(JobService):
     """A spy for the JobService to track method calls and parameters."""
 
     def __init__(self) -> None:
-        self.given_token: Optional[str] = None
-        self.requested_job_id: Optional[UUID] = None
+        self.given_token: str | None = None
+        self.requested_job_id: UUID | None = None
         self.returned_state = RRQueued()
 
     def fetch_job_state(self, token: str, job_id: UUID) -> JobState:

@@ -1,5 +1,3 @@
-from typing import Optional
-
 import pytest
 
 from aqt_connector._domain.oidc_service import OIDCService
@@ -11,7 +9,7 @@ from aqt_connector.exceptions import AuthenticationError, TokenValidationError
 class AuthAdapterSpyAlwaysAuthenticates(Auth0Adapter):
     def __init__(self) -> None:
         self.client_access_token = "this-is-the-client-token"
-        self.used_credentials: Optional[tuple[str, str]] = None
+        self.used_credentials: tuple[str, str] | None = None
 
     def fetch_token_with_client_credentials(self, client_id: str, client_secret: str) -> str:
         self.used_credentials = (client_id, client_secret)

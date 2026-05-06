@@ -1,7 +1,7 @@
 import sys
 import time
 from collections.abc import Callable
-from typing import Optional, TextIO, Union, cast
+from typing import TextIO, cast
 from uuid import UUID, uuid4
 
 import pytest
@@ -30,7 +30,7 @@ class AuthServiceSpy(AuthService):
         self.was_token_stored = False
         self.fetched_token = "thisisthetoken"
 
-    def get_or_refresh_access_token(self, store: bool) -> Optional[str]:
+    def get_or_refresh_access_token(self, store: bool) -> str | None:
         self.token_fetch_count += 1
         self.was_token_stored = store
         return self.fetched_token
@@ -40,11 +40,11 @@ class JobServiceSpy(JobService):
     """A spy for the JobService to track method calls and parameters."""
 
     def __init__(self) -> None:
-        self.given_token: Optional[str] = None
-        self.requested_job_id: Optional[UUID] = None
-        self.given_query_interval_seconds: Optional[float] = None
-        self.given_max_attempts: Optional[int] = None
-        self.given_out: Optional[TextIO] = None
+        self.given_token: str | None = None
+        self.requested_job_id: UUID | None = None
+        self.given_query_interval_seconds: float | None = None
+        self.given_max_attempts: int | None = None
+        self.given_out: TextIO | None = None
         self.returned_state = RRQueued()
 
     def wait_for_result(
@@ -56,7 +56,7 @@ class JobServiceSpy(JobService):
         wait: Callable[[float], None] = time.sleep,
         max_attempts: int = 600,
         out: TextIO = sys.stdout,
-        report_state: Optional[Callable[[NonFinalJobState], None]] = None,
+        report_state: Callable[[NonFinalJobState], None] | None = None,
     ) -> FinalJobState:
         self.given_token = token
         self.requested_job_id = job_id
@@ -148,7 +148,7 @@ def test_it_retries_after_not_authenticated_once_by_refreshing_token_and_succeed
     """It should retry once after NotAuthenticatedError by refreshing the token and succeeding."""
 
     class AuthServiceDouble(AuthServiceSpy):
-        def get_or_refresh_access_token(self, store: bool) -> Optional[str]:
+        def get_or_refresh_access_token(self, store: bool) -> str | None:
             self.token_fetch_count += 1
             return f"thisistoken{self.token_fetch_count}"
 
@@ -166,7 +166,7 @@ def test_it_retries_after_not_authenticated_once_by_refreshing_token_and_succeed
             wait: Callable[[float], None] = time.sleep,
             max_attempts: int = 600,
             out: TextIO = sys.stdout,
-            report_state: Optional[Callable[[NonFinalJobState], None]] = None,
+            report_state: Callable[[NonFinalJobState], None] | None = None,
         ) -> FinalJobState:
             if self.call_count == 0:
                 self.call_count = 1
@@ -187,7 +187,7 @@ def test_it_propagates_not_authenticated_error_when_refresh_returns_none() -> No
     """It should propagate NotAuthenticatedError if token refresh returns None."""
 
     class AuthServiceDouble(AuthServiceSpy):
-        def get_or_refresh_access_token(self, store: bool) -> Optional[str]:
+        def get_or_refresh_access_token(self, store: bool) -> str | None:
             if self.token_fetch_count == 0:
                 self.token_fetch_count = 1
                 return self.fetched_token
@@ -203,7 +203,7 @@ def test_it_propagates_not_authenticated_error_when_refresh_returns_none() -> No
             wait: Callable[[float], None] = time.sleep,
             max_attempts: int = 600,
             out: TextIO = sys.stdout,
-            report_state: Optional[Callable[[NonFinalJobState], None]] = None,
+            report_state: Callable[[NonFinalJobState], None] | None = None,
         ) -> FinalJobState:
             raise NotAuthenticatedError
 
@@ -219,7 +219,7 @@ def test_it_propagates_not_authenticated_error_when_refresh_returns_same_token()
     """It should propagate NotAuthenticatedError if token refresh returns the same token."""
 
     class AuthServiceDouble(AuthServiceSpy):
-        def get_or_refresh_access_token(self, store: bool) -> Optional[str]:
+        def get_or_refresh_access_token(self, store: bool) -> str | None:
             return self.fetched_token
 
     class JobServiceDouble(JobServiceSpy):
@@ -232,7 +232,7 @@ def test_it_propagates_not_authenticated_error_when_refresh_returns_same_token()
             wait: Callable[[float], None] = time.sleep,
             max_attempts: int = 600,
             out: TextIO = sys.stdout,
-            report_state: Optional[Callable[[NonFinalJobState], None]] = None,
+            report_state: Callable[[NonFinalJobState], None] | None = None,
         ) -> FinalJobState:
             raise NotAuthenticatedError
 
@@ -257,7 +257,7 @@ def test_it_does_not_attempt_refresh_when_static_api_token_and_not_authenticated
             wait: Callable[[float], None] = time.sleep,
             max_attempts: int = 600,
             out: TextIO = sys.stdout,
-            report_state: Optional[Callable[[NonFinalJobState], None]] = None,
+            report_state: Callable[[NonFinalJobState], None] | None = None,
         ) -> FinalJobState:
             raise NotAuthenticatedError
 
@@ -294,7 +294,7 @@ def test_it_propagates_other_exceptions_from_job_service(exception_type: type[Ex
             wait: Callable[[float], None] = time.sleep,
             max_attempts: int = 600,
             out: TextIO = sys.stdout,
-            report_state: Optional[Callable[[NonFinalJobState], None]] = None,
+            report_state: Callable[[NonFinalJobState], None] | None = None,
         ) -> FinalJobState:
             raise exception_type()
 
@@ -310,7 +310,7 @@ def test_it_handles_multiple_sequential_token_expiries_and_retries_until_success
     """It should handle multiple sequential NotAuthenticatedError exceptions by refreshing the token until success."""
 
     class AuthServiceDouble(AuthServiceSpy):
-        def get_or_refresh_access_token(self, store: bool) -> Optional[str]:
+        def get_or_refresh_access_token(self, store: bool) -> str | None:
             self.token_fetch_count += 1
             return f"thisistoken{self.token_fetch_count}"
 
@@ -327,7 +327,7 @@ def test_it_handles_multiple_sequential_token_expiries_and_retries_until_success
             wait: Callable[[float], None] = time.sleep,
             max_attempts: int = 600,
             out: TextIO = sys.stdout,
-            report_state: Optional[Callable[[NonFinalJobState], None]] = None,
+            report_state: Callable[[NonFinalJobState], None] | None = None,
         ) -> FinalJobState:
             if self.call_count < 2:
                 self.call_count += 1
@@ -345,7 +345,7 @@ def test_it_handles_multiple_sequential_token_expiries_and_retries_until_success
 
 
 @pytest.mark.parametrize("api_token", ["I am a token", None])
-def test_it_passes_report_state_callable_to_job_service(api_token: Union[str, None]) -> None:
+def test_it_passes_report_state_callable_to_job_service(api_token: str | None) -> None:
     """It should pass the report_state callable to the job service."""
 
     expected_state = RROngoing(finished_count=1)
@@ -360,7 +360,7 @@ def test_it_passes_report_state_callable_to_job_service(api_token: Union[str, No
             wait: Callable[[float], None] = time.sleep,
             max_attempts: int = 600,
             out: TextIO = sys.stdout,
-            report_state: Optional[Callable[[NonFinalJobState], None]] = None,
+            report_state: Callable[[NonFinalJobState], None] | None = None,
         ) -> FinalJobState:
             self.passed_callable = report_state
             if report_state:

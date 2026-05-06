@@ -1,4 +1,3 @@
-from typing import Optional
 from uuid import UUID, uuid4
 
 import pytest
@@ -39,7 +38,7 @@ class ArnicaAdapterSpy(ArnicaAdapter):
 class ArnicaAdapterFinishingSpy(ArnicaAdapterSpy):
     """A spy for the ArnicaAdapter that simulates a job finishing after several polls."""
 
-    def __init__(self, finished_state: Optional[JobState] = None) -> None:
+    def __init__(self, finished_state: JobState | None = None) -> None:
         super().__init__()
         self.queue_for_calls = 2
         self.finished_state: JobState = RRFinished(result={0: [[0, 0]]})

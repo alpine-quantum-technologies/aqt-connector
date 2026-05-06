@@ -1,9 +1,8 @@
 from io import StringIO
-from typing import Optional
 
 
 class StdoutSpy(StringIO):
-    def __init__(self, initial_value: Optional[str] = "", newline: Optional[str] = "\n") -> None:
+    def __init__(self, initial_value: str | None = "", newline: str | None = "\n") -> None:
         self.output: list[str] = []
         super().__init__(initial_value, newline)
 

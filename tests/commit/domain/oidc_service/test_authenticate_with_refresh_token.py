@@ -1,5 +1,3 @@
-from typing import Optional
-
 import pytest
 
 from aqt_connector._data_types import OfflineAccessTokens
@@ -12,7 +10,7 @@ from aqt_connector.exceptions import AuthenticationError, TokenValidationError
 class AuthAdapterSpyReturnsTokens(Auth0Adapter):
     def __init__(self) -> None:
         self.returned = OfflineAccessTokens(access_token="access-abc", refresh_token="refresh-def")
-        self.used_refresh: Optional[str] = None
+        self.used_refresh: str | None = None
 
     def fetch_token_with_refresh_token(self, refresh_token: str):
         self.used_refresh = refresh_token

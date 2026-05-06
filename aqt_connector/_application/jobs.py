@@ -1,5 +1,6 @@
 import sys
-from typing import Callable, Optional, TextIO
+from collections.abc import Callable
+from typing import TextIO
 from uuid import UUID
 
 from aqt_connector._arnica_app import ArnicaApp
@@ -7,7 +8,7 @@ from aqt_connector.exceptions import NotAuthenticatedError
 from aqt_connector.models.arnica.response_bodies.jobs import FinalJobState, JobState, NonFinalJobState
 
 
-def fetch_job_state(app: ArnicaApp, job_id: UUID, *, api_token: Optional[str] = None) -> JobState:
+def fetch_job_state(app: ArnicaApp, job_id: UUID, *, api_token: str | None = None) -> JobState:
     """Fetch the state of a job.
 
     Args:
@@ -38,11 +39,11 @@ def wait_for_final_state(
     app: ArnicaApp,
     job_id: UUID,
     *,
-    api_token: Optional[str] = None,
+    api_token: str | None = None,
     query_interval_seconds: float = 1.0,
     max_attempts: int = 600,
     out: TextIO = sys.stdout,
-    report_state: Optional[Callable[[NonFinalJobState], None]] = None,
+    report_state: Callable[[NonFinalJobState], None] | None = None,
 ) -> FinalJobState:
     """Wait for a job to reach a final state.
 

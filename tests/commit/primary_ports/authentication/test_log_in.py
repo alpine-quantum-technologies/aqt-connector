@@ -1,5 +1,5 @@
 import sys
-from typing import Optional, TextIO, Union
+from typing import TextIO
 
 import pytest
 
@@ -14,7 +14,7 @@ class OIDCServiceAlwaysAuthenticates(OIDCService):
         self.client_access_token = "this-is-the-client-token"
         self.device_access_token = "this-is-the-device-token"
         self.refresh_token = "this-is-the-refresh-token"
-        self.used_credentials: Optional[tuple[str, str]] = None
+        self.used_credentials: tuple[str, str] | None = None
 
     def authenticate_with_client_credentials(self, client_credentials) -> str:
         self.used_credentials = client_credentials
@@ -31,15 +31,15 @@ class AuthenticatedAuthService(AuthService):
     def save_access_token(self, access_token: str) -> None:
         self.stored_access_token = access_token
 
-    def get_or_refresh_access_token(self, store: bool) -> Union[str, None]:
+    def get_or_refresh_access_token(self, store: bool) -> str | None:
         return self.stored_access_token
 
 
 class UnauthenticatedAuthService(AuthService):
     def __init__(self) -> None:
-        self.stored_access_token: Union[str, None] = None
+        self.stored_access_token: str | None = None
 
-    def get_or_refresh_access_token(self, store: bool) -> Union[str, None]:
+    def get_or_refresh_access_token(self, store: bool) -> str | None:
         return self.stored_access_token
 
     def save_access_token(self, access_token: str) -> None:
@@ -65,7 +65,7 @@ def test_it_stores_refreshed_access_token_if_configured(store_access_token: bool
         def __init__(self):
             self.stored = False
 
-        def get_or_refresh_access_token(self, store: bool) -> Union[str, None]:
+        def get_or_refresh_access_token(self, store: bool) -> str | None:
             self.stored = store
             return "newaccesstoken"
 

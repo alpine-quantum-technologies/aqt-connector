@@ -3,7 +3,6 @@ import re
 from copy import deepcopy
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Union
 
 import tomli
 
@@ -38,8 +37,8 @@ class ArnicaConfig:
         """
         self._app_dir = app_dir
         self.arnica_url = "https://arnica.aqt.eu/api"
-        self.client_id: Union[str, None] = None
-        self.client_secret: Union[str, None] = None
+        self.client_id: str | None = None
+        self.client_secret: str | None = None
         self.store_access_token = True
         self.oidc_config = AuthenticationConfig()
 
