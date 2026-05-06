@@ -4,7 +4,7 @@ requires = [ "hatchling" ]
 
 [project]
 name = "aqt-connector"
-version = "0.3.0"
+version = "0.4.0"
 description = "Python connector for services provided by AQT"
 readme = "README.md"
 keywords = [

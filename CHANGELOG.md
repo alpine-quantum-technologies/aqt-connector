@@ -1,9 +1,13 @@
 # Changelog
 
 ## unreleased
+
+## aqt-connector 0.4.0
 * Function to (blockingly) await for the final result of a job #13
 * Description regarding access tokens storage and expiration in README #14
-* Update dependencies #18
+* The caller of the wait_for_final_state function can stay updated about the job state during polling #19
+* Add context manager to close http clients #23
+* Improve validation logic for measurement operations in circuits #29
 * Remove support for Python 3.9, add support for Python 3.14. Update dependencies #32
 
 ## aqt-connector 0.3.0
