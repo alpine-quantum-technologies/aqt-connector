@@ -203,7 +203,6 @@ docs = [
 ]
 test = [
     { name = "interrogate" },
-    { name = "pyjwt", extra = ["crypto"] },
     { name = "pytest-httpserver" },
     { name = "pytest-playwright" },
 ]
