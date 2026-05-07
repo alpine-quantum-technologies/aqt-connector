@@ -2,7 +2,7 @@ import random
 import sys
 import time
 from collections.abc import Callable
-from typing import Optional, TextIO, cast
+from typing import TextIO, cast
 from uuid import UUID
 
 from aqt_connector._infrastructure.arnica_adapter import ArnicaAdapter
@@ -45,7 +45,7 @@ class JobService:
         wait: Callable[[float], None] = time.sleep,
         max_attempts: int = 600,  # 10 minutes (average)
         out: TextIO = sys.stdout,
-        report_state: Optional[Callable[[NonFinalJobState], None]] = None,
+        report_state: Callable[[NonFinalJobState], None] | None = None,
     ) -> FinalJobState:
         """Waits for the job with the given ID to complete and returns its final state.
 

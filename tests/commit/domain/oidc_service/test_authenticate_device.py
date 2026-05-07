@@ -1,5 +1,3 @@
-from typing import Union
-
 import pytest
 
 from aqt_connector._data_types import DeviceCodeData, OfflineAccessTokens
@@ -21,7 +19,7 @@ class AuthAdapterSpyAlwaysAuthenticatesImmediately(Auth0Adapter):
             interval=5,
         )
 
-    def fetch_token_with_device_code(self, device_code: str) -> Union[OfflineAccessTokens, None]:
+    def fetch_token_with_device_code(self, device_code: str) -> OfflineAccessTokens | None:
         self.used_device_code = device_code
         return OfflineAccessTokens(
             access_token=self.device_access_token,
@@ -38,7 +36,7 @@ class AuthAdapterPollingSpy(Auth0Adapter):
         self.refresh_token = "this-is-the-refresh-token"
         self.token_poll_count = 0
 
-    def fetch_token_with_device_code(self, device_code: str) -> Union[OfflineAccessTokens, None]:
+    def fetch_token_with_device_code(self, device_code: str) -> OfflineAccessTokens | None:
         self.token_poll_count += 1
         if self.token_poll_count > 2:
             return OfflineAccessTokens(
@@ -59,7 +57,7 @@ class AuthAdapterPollingSpy(Auth0Adapter):
 class AuthAdapterNeverAuthenticates(Auth0Adapter):
     def __init__(self) -> None: ...
 
-    def fetch_token_with_device_code(self, device_code: str) -> Union[OfflineAccessTokens, None]:
+    def fetch_token_with_device_code(self, device_code: str) -> OfflineAccessTokens | None:
         raise AuthenticationError
 
     def fetch_device_code(self) -> DeviceCodeData:

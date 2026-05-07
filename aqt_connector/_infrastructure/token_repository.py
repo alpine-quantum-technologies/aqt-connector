@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import Union
 
 
 class TokenRepository:
@@ -27,7 +26,7 @@ class TokenRepository:
         """
         self._save_token(self.access_token_path, token)
 
-    def load_access_token(self) -> Union[str, None]:
+    def load_access_token(self) -> str | None:
         """Loads an access token from disk.
 
         Returns:
@@ -43,7 +42,7 @@ class TokenRepository:
         """
         self._save_token(self.refresh_token_path, refresh_token)
 
-    def load_refresh_token(self) -> Union[str, None]:
+    def load_refresh_token(self) -> str | None:
         """Loads a refresh token from disk.
 
         Returns:
@@ -61,7 +60,7 @@ class TokenRepository:
         with open(path, "w") as f:
             f.write(token)
 
-    def _load_token(self, path: Path) -> Union[str, None]:
+    def _load_token(self, path: Path) -> str | None:
         """Loads a token from disk at the specified path.
 
         Args:

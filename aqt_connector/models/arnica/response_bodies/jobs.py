@@ -1,9 +1,8 @@
 """ARNICA API response bodies for jobs."""
 
-from typing import Literal, Union
+from typing import Literal, TypeAlias
 
 from pydantic import BaseModel, Field
-from typing_extensions import TypeAlias
 
 from aqt_connector.models import BaseModelSerialisable
 from aqt_connector.models.arnica.jobs import BasicJobMetadata, JobStatus, StatusChange
@@ -14,7 +13,7 @@ class BaseResponse(BaseModel):
     """Base model for job result metadata."""
 
     status: JobStatus
-    timing_data: Union[list[StatusChange], None] = None
+    timing_data: list[StatusChange] | None = None
 
     def is_finished(self) -> bool:
         """Returns whether the job is in a finished state."""
@@ -54,9 +53,9 @@ class RRCancelled(BaseResponse):  # type: ignore[override, unused-ignore]
     status: Literal[JobStatus.CANCELLED] = JobStatus.CANCELLED
 
 
-JobState: TypeAlias = Union[RRQueued, RROngoing, RRFinished, RRError, RRCancelled]
-FinalJobState: TypeAlias = Union[RRFinished, RRError, RRCancelled]
-NonFinalJobState: TypeAlias = Union[RRQueued, RROngoing]
+JobState: TypeAlias = RRQueued | RROngoing | RRFinished | RRError | RRCancelled
+FinalJobState: TypeAlias = RRFinished | RRError | RRCancelled
+NonFinalJobState: TypeAlias = RRQueued | RROngoing
 
 
 class SubmitJobResponse(BaseModelSerialisable):

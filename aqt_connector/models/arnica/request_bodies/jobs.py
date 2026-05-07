@@ -1,6 +1,6 @@
 """ARNICA API request bodies for jobs."""
 
-from typing import Literal, Union
+from typing import Literal
 
 from pydantic import BaseModel, Field
 
@@ -13,7 +13,7 @@ class SubmitJobRequest(BaseModelSerialisable):
     """Request body model for the submit job endpoint."""
 
     job_type: Literal[JobType.QUANTUM_CIRCUIT] = JobType.QUANTUM_CIRCUIT
-    label: Union[str, None] = None
+    label: str | None = None
     payload: "QuantumCircuits"
 
 

@@ -19,14 +19,14 @@ license-files = [ "LICENSE" ]
 authors = [
   { name = "Alpine Quantum Technologies GmbH", email = "support.arnica@aqt.eu" },
 ]
-requires-python = ">=3.9,<3.14"
+requires-python = ">=3.10,<3.15"
 classifiers = [
   "Programming Language :: Python :: 3 :: Only",
-  "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
 ]
 dependencies = [
   "auth0-python>=4.7.2,<5",
@@ -57,7 +57,7 @@ dev = [
 ]
 test = [
   "interrogate~=1.7.0",
-  "pyjwt[cryptography]>=2.8,<3",
+  "pyjwt[crypto]>=2.8,<3",
   "pytest-httpserver>=1.1,<2",
   "pytest-playwright~=0.7.0",
 ]

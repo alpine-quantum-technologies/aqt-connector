@@ -1,5 +1,3 @@
-from typing import Union
-
 from aqt_connector._domain.auth_service import AuthService
 from aqt_connector._domain.oidc_service import OIDCService
 from aqt_connector._infrastructure.access_token_verifier import AccessTokenVerifier
@@ -12,7 +10,7 @@ class AccessTokenVerifierStub(AccessTokenVerifier):
 
 class TokenRepositorySpy(TokenRepository):
     def __init__(self) -> None:
-        self.saved_token: Union[str, None] = None
+        self.saved_token: str | None = None
 
     def save_access_token(self, token: str) -> None:
         self.saved_token = token

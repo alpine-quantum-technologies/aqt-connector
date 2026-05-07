@@ -1,5 +1,4 @@
 import urllib.parse
-from typing import Union
 
 import httpx
 
@@ -59,7 +58,7 @@ class Auth0Adapter:
             return token_data["access_token"]
         raise AuthenticationError
 
-    def fetch_token_with_device_code(self, device_code: str) -> Union[OfflineAccessTokens, None]:
+    def fetch_token_with_device_code(self, device_code: str) -> OfflineAccessTokens | None:
         """Fetches an access token with a device code.
 
         Fetches an access token with a device code, once the user has logged in.
