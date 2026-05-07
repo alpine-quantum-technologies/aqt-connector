@@ -57,6 +57,7 @@ dev = [
 ]
 test = [
   "interrogate~=1.7.0",
+  "pyjwt[crypto]>=2.8,<3",
   "pytest-httpserver>=1.1,<2",
   "pytest-playwright~=0.7.0",
 ]
