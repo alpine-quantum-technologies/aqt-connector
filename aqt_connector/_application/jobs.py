@@ -38,11 +38,14 @@ def submit_job(
         NotAuthenticatedError: if the user is not authenticated and no access token is available.
         RequestError: If there is a network-related error during the request.
         NotAuthenticatedError: If the provided token is invalid or expired.
+        WorkspaceIDError: If the provided workspace ID is invalid.
+        ResourceIDError: If the provided resource ID is invalid.
+        ValueError: If the request data is invalid.
         UnknownServerError: If the Arnica API encounters an internal error.
         RuntimeError: For any other unexpected errors.
 
     Returns:
-        SubmitJobResponse: metadata about the submitted job, include its job ID.
+        SubmitJobResponse: metadata about the submitted job, including its job ID.
     """
     token = api_token or app.auth_service.get_or_refresh_access_token(app.config.store_access_token)
     if not token:
