@@ -5,7 +5,49 @@ from uuid import UUID
 
 from aqt_connector._arnica_app import ArnicaApp
 from aqt_connector.exceptions import NotAuthenticatedError
-from aqt_connector.models.arnica.response_bodies.jobs import FinalJobState, JobState, NonFinalJobState
+from aqt_connector.models.arnica.request_bodies.jobs import QuantumCircuits
+from aqt_connector.models.arnica.response_bodies.jobs import (
+    FinalJobState,
+    JobState,
+    NonFinalJobState,
+    SubmitJobResponse,
+)
+
+
+def submit_job(
+    app: ArnicaApp,
+    workspace_id: str,
+    resource_id: str,
+    circuits: QuantumCircuits,
+    *,
+    label: str | None = None,
+    api_token: str | None = None,
+) -> SubmitJobResponse:
+    """Submit a job to the Arnica API.
+
+    Args:
+        app (ArnicaApp): the application instance.
+        workspace_id (str): the ID of the workspace to submit the job to.
+        resource_id (str): the ID of the resource to submit the job to.
+        circuits (QuantumCircuits): the quantum circuits to submit as part of the job.
+        label (str | None, optional): an optional label for the job. Defaults to None.
+        api_token (str | None, optional): a static API token to use for authentication. This will be used
+            in place of any token retrieved when logging in. Defaults to None.
+
+    Raises:
+        NotAuthenticatedError: if the user is not authenticated and no access token is available.
+        RequestError: If there is a network-related error during the request.
+        NotAuthenticatedError: If the provided token is invalid or expired.
+        UnknownServerError: If the Arnica API encounters an internal error.
+        RuntimeError: For any other unexpected errors.
+
+    Returns:
+        SubmitJobResponse: metadata about the submitted job, include its job ID.
+    """
+    token = api_token or app.auth_service.get_or_refresh_access_token(app.config.store_access_token)
+    if not token:
+        raise NotAuthenticatedError("User not authenticated. Please log in.")
+    return app.job_service.submit_job(token, workspace_id, resource_id, circuits, label=label)
 
 
 def fetch_job_state(app: ArnicaApp, job_id: UUID, *, api_token: str | None = None) -> JobState:
