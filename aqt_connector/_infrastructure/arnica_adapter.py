@@ -64,7 +64,7 @@ class ArnicaAdapter:
             response = self._http_client.post(
                 endpoint_url,
                 headers={"Authorization": f"Bearer {token}"},
-                json=request_data.model_dump(),
+                json=request_data.model_dump(mode="json"),
             )
             response.raise_for_status()
             return SubmitJobResponse.model_validate_json(response.text)
