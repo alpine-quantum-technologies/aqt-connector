@@ -46,6 +46,9 @@ class JobService:
         Raises:
             RequestError: If there is a network-related error during the request.
             NotAuthenticatedError: If the provided token is invalid or expired.
+            WorkspaceIDError: If the provided workspace ID is invalid.
+            ResourceIDError: If the provided resource ID is invalid.
+            ValueError: If the request data is invalid.
             UnknownServerError: If the Arnica API encounters an internal error.
             RuntimeError: For any other unexpected errors.
 
