@@ -8,9 +8,12 @@ from aqt_connector.exceptions import (
     JobNotFoundError,
     NotAuthenticatedError,
     RequestError,
+    ResourceIDError,
     UnknownServerError,
+    WorkspaceIDError,
 )
-from aqt_connector.models.arnica.response_bodies.jobs import JobState, ResultResponse
+from aqt_connector.models.arnica.request_bodies.jobs import QuantumCircuits, SubmitJobRequest
+from aqt_connector.models.arnica.response_bodies.jobs import JobState, ResultResponse, SubmitJobResponse
 
 
 class ArnicaAdapter:
@@ -28,6 +31,40 @@ class ArnicaAdapter:
     def close(self) -> None:
         """Closes the underlying HTTP client and releases its connection pool."""
         self._http_client.close()
+
+    def submit_job(
+        self, token: str, workspace_id: str, resource_id: str, circuits: QuantumCircuits, *, label: str | None = None
+    ) -> SubmitJobResponse:
+        endpoint_url = f"{self._base_url}/v1/submit/{workspace_id}/{resource_id}"
+
+        request_data = SubmitJobRequest(label=label, payload=circuits)
+
+        try:
+            response = self._http_client.post(
+                endpoint_url,
+                headers={"Authorization": f"Bearer {token}"},
+                json=request_data.model_dump(),
+            )
+            response.raise_for_status()
+            return SubmitJobResponse.model_validate_json(response.text)
+
+        except httpx.RequestError as exc:
+            raise RequestError from exc
+
+        except httpx.HTTPStatusError as exc:
+            exception_map = {
+                401: NotAuthenticatedError,
+                403: WorkspaceIDError,
+                404: ResourceIDError,
+                422: ValueError,
+                500: UnknownServerError,
+            }
+            if exc.response.status_code in exception_map:
+                raise exception_map[exc.response.status_code] from exc
+            raise RuntimeError from exc
+
+        except ValidationError as exc:
+            raise UnknownServerError from exc
 
     def fetch_job_state(self, token: str, job_id: UUID) -> JobState:
         """Fetches the state of a job from the Arnica API.

@@ -7,7 +7,13 @@ from uuid import UUID
 
 from aqt_connector._infrastructure.arnica_adapter import ArnicaAdapter
 from aqt_connector.exceptions import RequestError
-from aqt_connector.models.arnica.response_bodies.jobs import FinalJobState, JobState, NonFinalJobState
+from aqt_connector.models.arnica.request_bodies.jobs import QuantumCircuits
+from aqt_connector.models.arnica.response_bodies.jobs import (
+    FinalJobState,
+    JobState,
+    NonFinalJobState,
+    SubmitJobResponse,
+)
 
 
 class JobService:
@@ -18,6 +24,35 @@ class JobService:
             arnica (ArnicaAdapter): The Arnica adapter to use for fetching job states.
         """
         self.arnica = arnica
+
+    def submit_job(
+        self,
+        token: str,
+        workspace_id: str,
+        resource_id: str,
+        circuits: QuantumCircuits,
+        *,
+        label: str | None = None,
+    ) -> SubmitJobResponse:
+        """Submits a job to the Arnica API.
+
+        Args:
+            token (str): The authentication token to use.
+            workspace_id (str): The ID of the workspace to submit the job to.
+            resource_id (str): The ID of the resource to submit the job to.
+            circuits (QuantumCircuits): The quantum circuits to submit as part of the job.
+            label (str | None, optional): An optional label for the job. Defaults to None.
+
+        Raises:
+            RequestError: If there is a network-related error during the request.
+            NotAuthenticatedError: If the provided token is invalid or expired.
+            UnknownServerError: If the Arnica API encounters an internal error.
+            RuntimeError: For any other unexpected errors.
+
+        Returns:
+            SubmitJobResponse: Metadata about the submitted job, including its job ID.
+        """
+        return self.arnica.submit_job(token, workspace_id, resource_id, circuits, label=label)
 
     def fetch_job_state(self, token: str, job_id: UUID) -> JobState:
         """Fetches the state of a job with the given ID using the provided token.
