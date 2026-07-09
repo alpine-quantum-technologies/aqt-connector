@@ -35,6 +35,27 @@ class ArnicaAdapter:
     def submit_job(
         self, token: str, workspace_id: str, resource_id: str, circuits: QuantumCircuits, *, label: str | None = None
     ) -> SubmitJobResponse:
+        """Submits a quantum job to the Arnica API.
+
+        Args:
+            token (str): The authentication token to access the Arnica API.
+            workspace_id (str): The unique identifier of the workspace.
+            resource_id (str): The unique identifier of the resource.
+            circuits (QuantumCircuits): The quantum circuits to be submitted.
+            label (str | None, optional): An optional label for the job. Defaults to None
+
+        Raises:
+            RequestError: If there is a network-related error during the request.
+            NotAuthenticatedError: If the provided token is invalid or expired.
+            WorkspaceIDError: If the provided workspace ID is invalid.
+            ResourceIDError: If the provided resource ID is invalid.
+            ValueError: If the request data is invalid.
+            UnknownServerError: If the Arnica API encounters an internal error.
+            RuntimeError: For any other unexpected errors.
+
+        Returns:
+            SubmitJobResponse: Metadata about the submitted job, including its unique ID.
+        """
         endpoint_url = f"{self._base_url}/v1/submit/{workspace_id}/{resource_id}"
 
         request_data = SubmitJobRequest(label=label, payload=circuits)
