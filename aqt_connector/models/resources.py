@@ -62,3 +62,23 @@ class Characterisation(BaseModel):
     single_qubit_gate_duration_micros: float = Field(ge=0)
     two_qubit_gate_duration_micros: float = Field(ge=0)
     updated_at: datetime
+
+
+def indexes_are_ordered(qubits: tuple[int, int]) -> tuple[int, int]:
+    """Ensure that the qubit indexes are in ascending order."""
+    if qubits[0] > qubits[1]:
+        raise ValueError("Qubit indexes are not ordered!")
+    return qubits
+
+
+class TwoQubitGateFidelity(GateFidelity):
+    """Two-qubit gate fidelity for a specific pair of qubits.
+
+    Attributes:
+        qubits: The pair of qubits for which this fidelity applies. By convention, the lower-indexed
+            qubit comes first.
+        value: The fidelity value for this pair of qubits, between 0 and 100.
+        uncertainty: The uncertainty associated with the fidelity value, between 0 and 100.
+    """
+
+    qubits: Annotated[tuple[int, int], Field(min_length=2, max_length=2, after_validator=indexes_are_ordered)]
