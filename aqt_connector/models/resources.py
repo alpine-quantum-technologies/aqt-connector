@@ -64,12 +64,14 @@ class Characterisation(BaseModel):
     updated_at: datetime
 
 
-def indexes_are_non_negative_and_ordered(qubits: tuple[int, int]) -> tuple[int, int]:
-    """Ensure that the qubit indexes are non-negative and in ascending order."""
+def indices_are_non_negative_and_ordered(qubits: tuple[int, int]) -> tuple[int, int]:
+    """Ensure that the qubit indices are non-negative and in ascending order."""
     if any(index < 0 for index in qubits):
-        raise ValueError("Qubit indexes cannot be negative!")
+        raise ValueError("Qubit indices cannot be negative!")
+    if qubits[0] == qubits[1]:
+        raise ValueError("Qubit indices are equal!")
     if qubits[0] > qubits[1]:
-        raise ValueError("Qubit indexes are not ordered!")
+        raise ValueError("Qubit indices are not ordered!")
     return qubits
 
 
@@ -84,5 +86,5 @@ class TwoQubitGateFidelity(GateFidelity):
     """
 
     qubits: Annotated[
-        tuple[int, int], Field(min_length=2, max_length=2), AfterValidator(indexes_are_non_negative_and_ordered)
+        tuple[int, int], Field(min_length=2, max_length=2), AfterValidator(indices_are_non_negative_and_ordered)
     ]
