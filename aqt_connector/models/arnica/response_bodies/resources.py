@@ -2,9 +2,11 @@
 
 from datetime import datetime
 
+from pydantic import Field
+
 from aqt_connector.models import BaseModelSerialisable
 from aqt_connector.models.arnica.resources import ResourceStatus, ResourceType
-from aqt_connector.models.resources import Characterisation
+from aqt_connector.models.resources import Characterisation, TwoQubitGateFidelity
 
 
 class ResourceDetails(BaseModelSerialisable):
@@ -25,3 +27,9 @@ class WorkspaceResource(BaseModelSerialisable):
     id: str
     name: str
     type: ResourceType
+
+
+class CharacterisationResponse(BaseModelSerialisable, Characterisation):
+    """Model for the characterisation of a resource."""
+
+    two_qubit_gate_fidelity: list[TwoQubitGateFidelity] = Field(default_factory=list)
