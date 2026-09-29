@@ -2,6 +2,9 @@
 
 ## unreleased
 
+## aqt-connector 0.5.0
+* Add new characterisation response model #47
+
 ## aqt-connector 0.4.0
 * Function to (blockingly) await for the final result of a job #13
 * Description regarding access tokens storage and expiration in README #14
