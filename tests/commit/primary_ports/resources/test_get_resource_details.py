@@ -1,3 +1,4 @@
+from collections.abc import Iterator
 from datetime import datetime
 
 import pytest
@@ -46,9 +47,17 @@ class ResourceServiceSpy(ResourceService):
         return self.returned_details
 
 
-def test_it_gets_or_refreshes_token() -> None:
+@pytest.fixture
+def app() -> Iterator[ArnicaApp]:
+    application = ArnicaApp(ArnicaConfig())
+    try:
+        yield application
+    finally:
+        application.close()
+
+
+def test_it_gets_or_refreshes_token(app: ArnicaApp) -> None:
     """It should get or refresh the access token before requesting resource details."""
-    app = ArnicaApp(ArnicaConfig())
     app.auth_service = AuthServiceSpy()
     app.resource_service = ResourceServiceSpy()
 
@@ -58,9 +67,8 @@ def test_it_gets_or_refreshes_token() -> None:
     assert app.auth_service.was_token_stored is app.config.store_access_token
 
 
-def test_it_uses_fetched_token_to_request_resource_details() -> None:
+def test_it_uses_fetched_token_to_request_resource_details(app: ArnicaApp) -> None:
     """It should use the fetched access token to request resource details."""
-    app = ArnicaApp(ArnicaConfig())
     app.auth_service = AuthServiceSpy()
     app.resource_service = ResourceServiceSpy()
 
@@ -69,9 +77,8 @@ def test_it_uses_fetched_token_to_request_resource_details() -> None:
     assert app.resource_service.given_token == app.auth_service.fetched_token
 
 
-def test_it_uses_provided_api_token() -> None:
+def test_it_uses_provided_api_token(app: ArnicaApp) -> None:
     """It should use a provided API token instead of fetching one."""
-    app = ArnicaApp(ArnicaConfig())
     app.auth_service = AuthServiceSpy()
     app.resource_service = ResourceServiceSpy()
 
@@ -82,9 +89,8 @@ def test_it_uses_provided_api_token() -> None:
     assert not app.auth_service.was_token_fetched
 
 
-def test_it_raises_if_not_authenticated() -> None:
+def test_it_raises_if_not_authenticated(app: ArnicaApp) -> None:
     """It should raise NotAuthenticatedError if no access token is available."""
-    app = ArnicaApp(ArnicaConfig())
     app.auth_service = AuthServiceSpy()
     app.auth_service.fetched_token = None
     app.resource_service = ResourceServiceSpy()
@@ -93,9 +99,8 @@ def test_it_raises_if_not_authenticated() -> None:
         get_resource_details(app, "resource_a")
 
 
-def test_it_requests_correct_resource_details() -> None:
+def test_it_requests_correct_resource_details(app: ArnicaApp) -> None:
     """It should request details for the correct resource ID."""
-    app = ArnicaApp(ArnicaConfig())
     app.auth_service = AuthServiceSpy()
     app.resource_service = ResourceServiceSpy()
 
@@ -104,9 +109,8 @@ def test_it_requests_correct_resource_details() -> None:
     assert app.resource_service.requested_resource_id == "resource_a"
 
 
-def test_it_returns_resource_details() -> None:
+def test_it_returns_resource_details(app: ArnicaApp) -> None:
     """It should return the details fetched from the resource service."""
-    app = ArnicaApp(ArnicaConfig())
     app.auth_service = AuthServiceSpy()
     app.resource_service = ResourceServiceSpy()
 

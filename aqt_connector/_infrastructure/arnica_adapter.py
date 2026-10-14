@@ -20,14 +20,16 @@ from aqt_connector.models.arnica.response_bodies.resources import ResourceDetail
 class ArnicaAdapter:
     """Adapter for interacting with the Arnica API."""
 
-    def __init__(self, base_url: str) -> None:
-        """Initialises the ArnicaAdapter with the given base URL.
+    def __init__(self, base_url: str, *, http_client: httpx.Client | None = None) -> None:
+        """Initialises the ArnicaAdapter with the given base URL and HTTP client.
 
         Args:
             base_url (str): The base URL of the Arnica API.
+            http_client (httpx.Client | None, optional): The HTTP client to use. The adapter takes ownership of
+                the client and closes it when :meth:`close` is called. Defaults to None.
         """
         self._base_url = base_url
-        self._http_client = httpx.Client()
+        self._http_client = http_client if http_client is not None else httpx.Client()
 
     def close(self) -> None:
         """Closes the underlying HTTP client and releases its connection pool."""
