@@ -14,23 +14,68 @@ from aqt_connector.exceptions import (
 )
 from aqt_connector.models.arnica.request_bodies.jobs import QuantumCircuits, SubmitJobRequest
 from aqt_connector.models.arnica.response_bodies.jobs import JobState, ResultResponse, SubmitJobResponse
+from aqt_connector.models.arnica.response_bodies.resources import ResourceDetails
 
 
 class ArnicaAdapter:
     """Adapter for interacting with the Arnica API."""
 
-    def __init__(self, base_url: str) -> None:
-        """Initialises the ArnicaAdapter with the given base URL.
+    def __init__(self, base_url: str, *, http_client: httpx.Client | None = None) -> None:
+        """Initialises the ArnicaAdapter with the given base URL and HTTP client.
 
         Args:
             base_url (str): The base URL of the Arnica API.
+            http_client (httpx.Client | None, optional): The HTTP client to use. The adapter takes ownership of
+                the client and closes it when :meth:`close` is called. Defaults to None.
         """
         self._base_url = base_url
-        self._http_client = httpx.Client()
+        self._http_client = http_client if http_client is not None else httpx.Client()
 
     def close(self) -> None:
         """Closes the underlying HTTP client and releases its connection pool."""
         self._http_client.close()
+
+    def get_resource_details(self, token: str, resource_id: str) -> ResourceDetails:
+        """Fetches details for a resource from the Arnica API.
+
+        Args:
+            token (str): The authentication token to access the Arnica API.
+            resource_id (str): The unique identifier of the resource.
+
+        Raises:
+            RequestError: If there is a network-related error during the request.
+            NotAuthenticatedError: If the provided token is invalid or expired.
+            ResourceIDError: If the provided resource ID is invalid or unavailable.
+            ValueError: If the provided resource ID is invalid.
+            UnknownServerError: If the Arnica API encounters an internal error or returns an invalid response.
+            RuntimeError: For any other unexpected errors.
+
+        Returns:
+            ResourceDetails: Details for the requested resource.
+        """
+        endpoint_url = f"{self._base_url}/v1/resources/{resource_id}"
+
+        try:
+            response = self._http_client.get(endpoint_url, headers={"Authorization": f"Bearer {token}"})
+            response.raise_for_status()
+            return ResourceDetails.model_validate_json(response.text)
+
+        except httpx.RequestError as exc:
+            raise RequestError from exc
+
+        except httpx.HTTPStatusError as exc:
+            exception_map = {
+                401: NotAuthenticatedError,
+                403: ResourceIDError,
+                422: ValueError,
+                500: UnknownServerError,
+            }
+            if exc.response.status_code in exception_map:
+                raise exception_map[exc.response.status_code] from exc
+            raise RuntimeError from exc
+
+        except ValidationError as exc:
+            raise UnknownServerError from exc
 
     def submit_job(
         self, token: str, workspace_id: str, resource_id: str, circuits: QuantumCircuits, *, label: str | None = None
