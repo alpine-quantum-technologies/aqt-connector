@@ -22,6 +22,14 @@ class InvalidJobIDError(ValueError):
     """A failure due to querying an invalid job ID."""
 
 
+class WorkspaceIDError(ValueError):
+    """A failure due to querying a workspace that doesn't exist."""
+
+
+class ResourceIDError(ValueError):
+    """A failure due to querying a resource that doesn't exist."""
+
+
 class UnknownServerError(RuntimeError):
     """A failure due to an unknown server error."""
 
