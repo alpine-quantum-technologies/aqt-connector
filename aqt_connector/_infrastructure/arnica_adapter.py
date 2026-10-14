@@ -14,6 +14,7 @@ from aqt_connector.exceptions import (
 )
 from aqt_connector.models.arnica.request_bodies.jobs import QuantumCircuits, SubmitJobRequest
 from aqt_connector.models.arnica.response_bodies.jobs import JobState, ResultResponse, SubmitJobResponse
+from aqt_connector.models.arnica.response_bodies.resources import ResourceDetails
 
 
 class ArnicaAdapter:
@@ -31,6 +32,48 @@ class ArnicaAdapter:
     def close(self) -> None:
         """Closes the underlying HTTP client and releases its connection pool."""
         self._http_client.close()
+
+    def get_resource_details(self, token: str, resource_id: str) -> ResourceDetails:
+        """Fetches details for a resource from the Arnica API.
+
+        Args:
+            token (str): The authentication token to access the Arnica API.
+            resource_id (str): The unique identifier of the resource.
+
+        Raises:
+            RequestError: If there is a network-related error during the request.
+            NotAuthenticatedError: If the provided token is invalid or expired.
+            ResourceIDError: If the provided resource ID is invalid or unavailable.
+            ValueError: If the provided resource ID is invalid.
+            UnknownServerError: If the Arnica API encounters an internal error or returns an invalid response.
+            RuntimeError: For any other unexpected errors.
+
+        Returns:
+            ResourceDetails: Details for the requested resource.
+        """
+        endpoint_url = f"{self._base_url}/v1/resources/{resource_id}"
+
+        try:
+            response = self._http_client.get(endpoint_url, headers={"Authorization": f"Bearer {token}"})
+            response.raise_for_status()
+            return ResourceDetails.model_validate_json(response.text)
+
+        except httpx.RequestError as exc:
+            raise RequestError from exc
+
+        except httpx.HTTPStatusError as exc:
+            exception_map = {
+                401: NotAuthenticatedError,
+                403: ResourceIDError,
+                422: ValueError,
+                500: UnknownServerError,
+            }
+            if exc.response.status_code in exception_map:
+                raise exception_map[exc.response.status_code] from exc
+            raise RuntimeError from exc
+
+        except ValidationError as exc:
+            raise UnknownServerError from exc
 
     def submit_job(
         self, token: str, workspace_id: str, resource_id: str, circuits: QuantumCircuits, *, label: str | None = None
