@@ -5,6 +5,7 @@ from typing_extensions import Self
 from aqt_connector._domain.auth_service import AuthService
 from aqt_connector._domain.job_service import JobService
 from aqt_connector._domain.oidc_service import OIDCService
+from aqt_connector._domain.resource_service import ResourceService
 from aqt_connector._infrastructure.access_token_verifier import AccessTokenVerifier, AccessTokenVerifierConfig
 from aqt_connector._infrastructure.arnica_adapter import ArnicaAdapter
 from aqt_connector._infrastructure.auth0_adapter import Auth0Adapter
@@ -42,6 +43,7 @@ class ArnicaApp:
             self.oidc_service = OIDCService(self._auth0_adapter, token_verifier)
             self.auth_service = AuthService(token_verifier, TokenRepository(config._app_dir), self.oidc_service)
             self.job_service = JobService(self._arnica_adapter)
+            self.resource_service = ResourceService(self._arnica_adapter)
 
             stack.pop_all()
 
