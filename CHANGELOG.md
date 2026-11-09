@@ -1,6 +1,7 @@
 # Changelog
 
-## unreleased
+## aqt-connector 0.6.0
+* Remove the upper limit on the number of circuit qubits #57
 
 ## aqt-connector 0.5.0
 * Add new characterisation response model #47
