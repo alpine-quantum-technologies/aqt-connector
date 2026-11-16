@@ -91,7 +91,7 @@ python -m aqt_connector log-in --arnica-url https://arnica.aqt.eu/api
 Where are things stored?
 
 - When using the CLI, configuration and the token are stored in your OS application directory for "aqt" (e.g. Linux: ~/.config/aqt; macOS: ~/Library/Application Support/aqt; Windows: %APPDATA%\aqt).
-- The token is saved as a file named access_token in that directory.
+- Device login saves access and refresh tokens as `access_token` and `refresh_token` files in that directory.
 
 
 ## Configuration
@@ -120,8 +120,10 @@ store_access_token = true
 
 Notes:
 
-- store_access_token=true will persist the obtained token to {app_dir}/access_token
+- store_access_token=true will persist the access token and, for device login, the refresh token to `{app_dir}/access_token` and `{app_dir}/refresh_token`
 - To disable persistence, set store_access_token=false in this file
+
+If a stored refresh token is rejected during login, `log_in()` starts a fresh device or configured client-credentials login. You can remove `{app_dir}/refresh_token` manually if you need to discard the rejected credential.
 
 ### Environment variables
 

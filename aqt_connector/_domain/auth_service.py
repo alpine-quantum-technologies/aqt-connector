@@ -45,6 +45,14 @@ class AuthService:
         """
         self._token_repo.save_access_token(access_token)
 
+    def save_refresh_token(self, refresh_token: str) -> None:
+        """Stores a refresh token.
+
+        Args:
+            refresh_token (str): the refresh token to store.
+        """
+        self._token_repo.save_refresh_token(refresh_token)
+
     def get_or_refresh_access_token(self, store: bool) -> str | None:
         """Gets an access token for the current user session, or refreshes it.
 

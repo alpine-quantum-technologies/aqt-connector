@@ -4,6 +4,7 @@ import sys
 from typing import TextIO
 
 from aqt_connector._arnica_app import ArnicaApp
+from aqt_connector.exceptions import AuthenticationError
 
 
 def log_in(
@@ -20,7 +21,11 @@ def log_in(
     Returns:
         str: the user's access token.
     """
-    existing_valid_token = app.auth_service.get_or_refresh_access_token(app.config.store_access_token)
+    try:
+        existing_valid_token = app.auth_service.get_or_refresh_access_token(app.config.store_access_token)
+    except AuthenticationError:
+        existing_valid_token = None
+
     if existing_valid_token:
         stdout.write("Already authenticated!\n")
         return existing_valid_token
@@ -29,11 +34,16 @@ def log_in(
         access_token = app.oidc_service.authenticate_with_client_credentials(
             (app.config.client_id, app.config.client_secret)
         )
+        refresh_token = None
     else:
-        access_token, _ = app.oidc_service.authenticate_device(out=stdout)
+        tokens = app.oidc_service.authenticate_device(out=stdout)
+        access_token = tokens.access_token
+        refresh_token = tokens.refresh_token
 
     if app.config.store_access_token:
         app.auth_service.save_access_token(access_token)
+        if refresh_token:
+            app.auth_service.save_refresh_token(refresh_token)
 
     return access_token
 
