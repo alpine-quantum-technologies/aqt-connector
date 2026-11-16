@@ -92,6 +92,7 @@ Where are things stored?
 
 - When using the CLI, configuration and the token are stored in your OS application directory for "aqt" (e.g. Linux: ~/.config/aqt; macOS: ~/Library/Application Support/aqt; Windows: %APPDATA%\aqt).
 - Device login saves access and refresh tokens as `access_token` and `refresh_token` files in that directory.
+- On POSIX systems (including Linux and macOS), saved token files use owner-only read/write permissions (`0600`), including existing files when overwritten. Windows access remains governed by directory and file ACLs.
 
 
 ## Configuration

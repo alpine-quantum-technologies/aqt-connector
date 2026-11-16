@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 
@@ -57,7 +58,11 @@ class TokenRepository:
             path (Path): the file path to save the token.
             token (str): the token to save.
         """
-        with open(path, "w") as f:
+        fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+        with os.fdopen(fd, "w") as f:
+            if os.name == "posix":
+                # Restrict existing files too, before writing the new credential.
+                os.fchmod(f.fileno(), 0o600)
             f.write(token)
 
     def _load_token(self, path: Path) -> str | None:
