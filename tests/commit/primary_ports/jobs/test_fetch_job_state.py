@@ -15,10 +15,10 @@ from aqt_connector.models.arnica.response_bodies.jobs import JobState, RRCancell
 class AuthServiceSpy(AuthService):
     """A spy for the AuthService to track method calls and parameters."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.was_token_fetched = False
         self.was_token_stored = False
-        self.fetched_token = "thisisthetoken"
+        self.fetched_token: str | None = "thisisthetoken"
         self.refreshed_token: str | None = "this-is-the-refreshed-token"
         self.force_refresh_count = 0
 
@@ -150,6 +150,7 @@ def test_fetch_job_state_retries_http_401_or_403_with_refreshed_token(
 
     assert isinstance(state, RRCancelled)
     assert authorization_headers == ["Bearer thisisthetoken", "Bearer this-is-the-refreshed-token"]
+    assert isinstance(app.auth_service, AuthServiceSpy)
     assert app.auth_service.force_refresh_count == 1
     adapter.close()
 
@@ -165,6 +166,7 @@ def test_wait_for_final_state_retries_http_401_or_403_with_refreshed_token(
 
     assert isinstance(state, RRCancelled)
     assert authorization_headers == ["Bearer thisisthetoken", "Bearer this-is-the-refreshed-token"]
+    assert isinstance(app.auth_service, AuthServiceSpy)
     assert app.auth_service.force_refresh_count == 1
     adapter.close()
 
