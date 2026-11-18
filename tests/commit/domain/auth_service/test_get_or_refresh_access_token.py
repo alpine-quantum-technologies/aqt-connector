@@ -1,4 +1,3 @@
-import pytest
 
 from aqt_connector._data_types import OfflineAccessTokens
 from aqt_connector._domain.auth_service import AuthService
