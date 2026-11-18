@@ -24,7 +24,7 @@ class AuthServiceSpy(AuthService):
         self.was_token_stored = False
         self.fetched_token = "thisisthetoken"
 
-    def get_or_refresh_access_token(self, store: bool) -> str | None:
+    def get_or_refresh_access_token(self, store: bool, *, force_refresh: bool = False) -> str | None:
         self.was_token_fetched = True
         self.was_token_stored = store
         return self.fetched_token
@@ -123,7 +123,7 @@ def test_it_raises_if_not_authenticated() -> None:
     """It should raise NotAuthenticatedError if no access token is available."""
 
     class UnauthenticatedAuthService(AuthServiceSpy):
-        def get_or_refresh_access_token(self, store: bool) -> str | None:
+        def get_or_refresh_access_token(self, store: bool, *, force_refresh: bool = False) -> str | None:
             return None  # Simulate no token available
 
     app = ArnicaApp(ArnicaConfig())

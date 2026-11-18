@@ -82,6 +82,21 @@ class ArnicaAdapterWithNonTransientErrors(ArnicaAdapterSpy):
         raise self.exception()
 
 
+class ArnicaAdapterWithSequence(ArnicaAdapterSpy):
+    """A spy that returns or raises a sequence of responses."""
+
+    def __init__(self, outcomes: list[JobState | Exception]) -> None:
+        super().__init__()
+        self.outcomes = outcomes
+
+    def fetch_job_state(self, token: str, job_id: UUID) -> JobState:
+        self.fetch_job_state_called_with.append((token, job_id))
+        outcome = self.outcomes.pop(0)
+        if isinstance(outcome, Exception):
+            raise outcome
+        return outcome
+
+
 def test_it_invokes_adapter_with_token_and_job_id() -> None:
     """It should invoke the adapter with the given token and job ID."""
     adapter_spy = ArnicaAdapterSpy()
@@ -169,6 +184,188 @@ def test_it_continues_polling_on_transient_request_errors() -> None:
 
     assert len(adapter_spy.fetch_job_state_called_with) == 3
     assert result is adapter_spy.returned_state
+
+
+def test_it_refreshes_again_after_a_later_poll_expires() -> None:
+    """Polling should refresh on multiple expiries separated by successful poll responses."""
+    adapter_spy = ArnicaAdapterWithSequence(
+        [
+            NotAuthenticatedError(),
+            RRQueued(),
+            NotAuthenticatedError(),
+            RROngoing(finished_count=1),
+            RRFinished(result={0: [[0, 0]]}),
+        ]
+    )
+    service = JobService(adapter_spy)
+    refresh_count = 0
+    wait_count = 0
+    reported_states: list[JobState] = []
+
+    def refresh_token() -> str:
+        nonlocal refresh_count
+        refresh_count += 1
+        return f"token-{refresh_count}"
+
+    def wait_mock(duration: float) -> None:
+        nonlocal wait_count
+        wait_count += 1
+
+    result = service.wait_for_result(
+        "initial-token", uuid4(), refresh_token=refresh_token, wait=wait_mock, report_state=reported_states.append
+    )
+
+    assert isinstance(result, RRFinished)
+    assert [token for token, _ in adapter_spy.fetch_job_state_called_with] == [
+        "initial-token",
+        "token-1",
+        "token-1",
+        "token-2",
+        "token-2",
+    ]
+    assert refresh_count == 2
+    assert wait_count == 2
+    assert reported_states == [RRQueued(), RROngoing(finished_count=1)]
+
+
+def test_it_stops_when_the_immediate_refresh_retry_is_rejected() -> None:
+    """It should stop attempting to poll if the immediate retry is rejected."""
+    adapter_spy = ArnicaAdapterWithSequence([NotAuthenticatedError(), NotAuthenticatedError()])
+    service = JobService(adapter_spy)
+    refresh_count = 0
+
+    def refresh_token() -> str:
+        nonlocal refresh_count
+        refresh_count += 1
+        return "replacement-token"
+
+    with pytest.raises(NotAuthenticatedError):
+        service.wait_for_result("rejected-token", uuid4(), refresh_token=refresh_token)
+
+    assert refresh_count == 1
+    assert len(adapter_spy.fetch_job_state_called_with) == 2
+
+
+@pytest.mark.parametrize("replacement_token", [None, "rejected-token"])
+def test_it_stops_when_refresh_returns_no_new_token(replacement_token: str | None) -> None:
+    """It should stop polling when the token cannot be refreshed."""
+    adapter_spy = ArnicaAdapterWithSequence([NotAuthenticatedError()])
+    service = JobService(adapter_spy)
+
+    with pytest.raises(NotAuthenticatedError):
+        service.wait_for_result("rejected-token", uuid4(), refresh_token=lambda: replacement_token)
+
+    assert len(adapter_spy.fetch_job_state_called_with) == 1
+
+
+def test_it_propagates_refresh_errors() -> None:
+    """It should propagate refresh errors without treating them as transient poll errors."""
+    adapter_spy = ArnicaAdapterWithSequence([NotAuthenticatedError()])
+    service = JobService(adapter_spy)
+    stdout_spy = StdoutSpy()
+
+    def refresh_token() -> str:
+        raise RequestError("refresh failed")
+
+    with pytest.raises(RequestError, match="refresh failed"):
+        service.wait_for_result("rejected-token", uuid4(), refresh_token=refresh_token, out=stdout_spy)
+
+    assert len(adapter_spy.fetch_job_state_called_with) == 1
+    assert stdout_spy.getvalue() == ""
+
+
+def test_refreshes_do_not_reset_the_polling_attempt_budget() -> None:
+    """Refreshing the token should not reset the polling attempt budget."""
+    adapter_spy = ArnicaAdapterWithSequence([NotAuthenticatedError(), RRQueued(), NotAuthenticatedError(), RRQueued()])
+    service = JobService(adapter_spy)
+    refresh_count = 0
+    wait_count = 0
+
+    def refresh_token() -> str:
+        nonlocal refresh_count
+        refresh_count += 1
+        return f"token-{refresh_count}"
+
+    def wait_mock(duration: float) -> None:
+        nonlocal wait_count
+        wait_count += 1
+
+    with pytest.raises(TimeoutError, match="Timed out after 2 attempts"):
+        service.wait_for_result("initial-token", uuid4(), max_attempts=2, refresh_token=refresh_token, wait=wait_mock)
+
+    assert refresh_count == 2
+    assert len(adapter_spy.fetch_job_state_called_with) == 4
+    assert wait_count == 1
+
+
+def test_it_can_finish_after_refresh_on_the_last_permitted_poll() -> None:
+    """It should still be able to refresh with only one poll left in budget."""
+    adapter_spy = ArnicaAdapterWithSequence([RRQueued(), NotAuthenticatedError(), RRFinished(result={0: [[0, 0]]})])
+    service = JobService(adapter_spy)
+
+    result = service.wait_for_result(
+        "initial-token", uuid4(), max_attempts=2, refresh_token=lambda: "replacement-token", wait=lambda _: None
+    )
+
+    assert isinstance(result, RRFinished)
+    assert [token for token, _ in adapter_spy.fetch_job_state_called_with] == [
+        "initial-token",
+        "initial-token",
+        "replacement-token",
+    ]
+
+
+def test_it_retries_after_transient_error_on_immediate_refresh_retry() -> None:
+    """It should retry the retry if a transient error is encountered."""
+    adapter_spy = ArnicaAdapterWithSequence(
+        [NotAuthenticatedError(), RequestError("temporary failure"), RRFinished(result={0: [[0, 0]]})]
+    )
+    service = JobService(adapter_spy)
+    stdout_spy = StdoutSpy()
+    wait_count = 0
+
+    def wait_mock(duration: float) -> None:
+        nonlocal wait_count
+        wait_count += 1
+
+    result = service.wait_for_result(
+        "initial-token",
+        uuid4(),
+        max_attempts=3,
+        refresh_token=lambda: "replacement-token",
+        out=stdout_spy,
+        wait=wait_mock,
+    )
+
+    assert isinstance(result, RRFinished)
+    assert [token for token, _ in adapter_spy.fetch_job_state_called_with] == [
+        "initial-token",
+        "replacement-token",
+        "replacement-token",
+    ]
+    assert "Transient (RequestError) error encountered" in stdout_spy.getvalue()
+    assert wait_count == 1
+
+
+def test_it_does_not_refresh_when_the_state_reporter_raises_not_authenticated() -> None:
+    """It should not refresh again if we still get NotAuthenticated."""
+    adapter_spy = ArnicaAdapterWithSequence([RRQueued()])
+    service = JobService(adapter_spy)
+    refresh_count = 0
+
+    def report_state(state: JobState) -> None:
+        raise NotAuthenticatedError
+
+    def refresh_token() -> str:
+        nonlocal refresh_count
+        refresh_count += 1
+        return "replacement-token"
+
+    with pytest.raises(NotAuthenticatedError):
+        service.wait_for_result("initial-token", uuid4(), refresh_token=refresh_token, report_state=report_state)
+
+    assert refresh_count == 0
+    assert len(adapter_spy.fetch_job_state_called_with) == 1
 
 
 def test_it_raises_timeout_error_after_max_attempts() -> None:

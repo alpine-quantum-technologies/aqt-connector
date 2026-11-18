@@ -38,7 +38,7 @@ class AuthenticatedAuthService(AuthService):
     def save_refresh_token(self, refresh_token: str) -> None:
         self.stored_refresh_token = refresh_token
 
-    def get_or_refresh_access_token(self, store: bool) -> str | None:
+    def get_or_refresh_access_token(self, store: bool, *, force_refresh: bool = False) -> str | None:
         return self.stored_access_token
 
 
@@ -47,7 +47,7 @@ class UnauthenticatedAuthService(AuthService):
         self.stored_access_token: str | None = None
         self.stored_refresh_token: str | None = None
 
-    def get_or_refresh_access_token(self, store: bool) -> str | None:
+    def get_or_refresh_access_token(self, store: bool, *, force_refresh: bool = False) -> str | None:
         return self.stored_access_token
 
     def save_access_token(self, access_token: str) -> None:
@@ -58,7 +58,7 @@ class UnauthenticatedAuthService(AuthService):
 
 
 class RejectedRefreshAuthService(UnauthenticatedAuthService):
-    def get_or_refresh_access_token(self, store: bool) -> str | None:
+    def get_or_refresh_access_token(self, store: bool, *, force_refresh: bool = False) -> str | None:
         raise AuthenticationError("refresh token rejected")
 
 
@@ -81,7 +81,7 @@ def test_it_stores_refreshed_access_token_if_configured(store_access_token: bool
         def __init__(self):
             self.stored = False
 
-        def get_or_refresh_access_token(self, store: bool) -> str | None:
+        def get_or_refresh_access_token(self, store: bool, *, force_refresh: bool = False) -> str | None:
             self.stored = store
             return "newaccesstoken"
 
@@ -203,7 +203,7 @@ def test_it_propagates_unrelated_error_from_token_lookup() -> None:
     """It should only recover from authentication failures during token lookup."""
 
     class AuthServiceFailingTokenLookup(UnauthenticatedAuthService):
-        def get_or_refresh_access_token(self, store: bool) -> str | None:
+        def get_or_refresh_access_token(self, store: bool, *, force_refresh: bool = False) -> str | None:
             raise RuntimeError("token storage failed")
 
     app = ArnicaApp(ArnicaConfig())

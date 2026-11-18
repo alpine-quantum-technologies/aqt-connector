@@ -53,16 +53,17 @@ class AuthService:
         """
         self._token_repo.save_refresh_token(refresh_token)
 
-    def get_or_refresh_access_token(self, store: bool) -> str | None:
+    def get_or_refresh_access_token(self, store: bool, *, force_refresh: bool = False) -> str | None:
         """Gets an access token for the current user session, or refreshes it.
 
         Args:
             store (bool): whether to store the access token.
+            force_refresh (bool): whether to refresh even if a valid access token is stored.
 
         Returns:
             str | None: the access token if available, otherwise None.
         """
-        if existing_token := self.get_access_token():
+        if not force_refresh and (existing_token := self.get_access_token()):
             return existing_token
 
         if refresh_token := self._token_repo.load_refresh_token():

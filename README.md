@@ -124,6 +124,8 @@ Notes:
 - store_access_token=true will persist the access token and, for device login, the refresh token to `{app_dir}/access_token` and `{app_dir}/refresh_token`
 - To disable persistence, set store_access_token=false in this file
 
+When the Arnica server rejects an access token while polling a job result, the SDK refreshes the token and retries that poll once. It can refresh again if a later poll expires, within the original polling attempt limit. User-provided API tokens are not refreshed.
+
 If a stored refresh token is rejected during login, `log_in()` starts a fresh device or configured client-credentials login. You can remove `{app_dir}/refresh_token` manually if you need to discard the rejected credential.
 
 ### Environment variables

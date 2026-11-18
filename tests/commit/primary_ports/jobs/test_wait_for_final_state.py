@@ -25,14 +25,19 @@ from tests.commit.domain.stdout_spy import StdoutSpy
 class AuthServiceSpy(AuthService):
     """A spy for the AuthService to track method calls and parameters."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.token_fetch_count = 0
+        self.force_refresh_count = 0
         self.was_token_stored = False
-        self.fetched_token = "thisisthetoken"
+        self.fetched_token: str | None = "thisisthetoken"
+        self.refreshed_token: str | None = "this-is-the-refreshed-token"
 
-    def get_or_refresh_access_token(self, store: bool) -> str | None:
+    def get_or_refresh_access_token(self, store: bool, *, force_refresh: bool = False) -> str | None:
         self.token_fetch_count += 1
         self.was_token_stored = store
+        if force_refresh:
+            self.force_refresh_count += 1
+            return self.refreshed_token
         return self.fetched_token
 
 
@@ -45,6 +50,7 @@ class JobServiceSpy(JobService):
         self.given_query_interval_seconds: float | None = None
         self.given_max_attempts: int | None = None
         self.given_out: TextIO | None = None
+        self.refresh_callback: Callable[[], str | None] | None = None
         self.returned_state = RRQueued()
 
     def wait_for_result(
@@ -57,12 +63,14 @@ class JobServiceSpy(JobService):
         max_attempts: int = 600,
         out: TextIO = sys.stdout,
         report_state: Callable[[NonFinalJobState], None] | None = None,
+        refresh_token: Callable[[], str | None] | None = None,
     ) -> FinalJobState:
         self.given_token = token
         self.requested_job_id = job_id
         self.given_query_interval_seconds = query_interval_seconds
         self.given_max_attempts = max_attempts
         self.given_out = out
+        self.refresh_callback = refresh_token
         return cast(FinalJobState, self.returned_state)
 
 
@@ -144,18 +152,12 @@ def test_it_returns_job_state_from_job_service() -> None:
     assert job_state is app.job_service.returned_state
 
 
-def test_it_retries_after_not_authenticated_once_by_refreshing_token_and_succeeds() -> None:
-    """It should retry once after NotAuthenticatedError by refreshing the token and succeeding."""
-
-    class AuthServiceDouble(AuthServiceSpy):
-        def get_or_refresh_access_token(self, store: bool) -> str | None:
-            self.token_fetch_count += 1
-            return f"thisistoken{self.token_fetch_count}"
+def test_it_passes_forced_refresh_callback_for_managed_token() -> None:
+    """Managed polling should receive a callback that forces refresh through AuthService."""
 
     class JobServiceDouble(JobService):
         def __init__(self) -> None:
-            self.call_count = 0
-            self.return_value = RRCancelled()
+            pass
 
         def wait_for_result(
             self,
@@ -167,81 +169,21 @@ def test_it_retries_after_not_authenticated_once_by_refreshing_token_and_succeed
             max_attempts: int = 600,
             out: TextIO = sys.stdout,
             report_state: Callable[[NonFinalJobState], None] | None = None,
+            refresh_token: Callable[[], str | None] | None = None,
         ) -> FinalJobState:
-            if self.call_count == 0:
-                self.call_count = 1
-                raise NotAuthenticatedError
-            return self.return_value
+            self.refresh_callback = refresh_token
+            return RRCancelled()
 
     app = ArnicaApp(ArnicaConfig())
-    app.auth_service = AuthServiceDouble()
+    app.auth_service = AuthServiceSpy()
     app.job_service = JobServiceDouble()
 
     final_state = wait_for_final_state(app, uuid4())
 
-    assert final_state is app.job_service.return_value
-    assert app.auth_service.token_fetch_count == 2  # initial + 1 retry
-
-
-def test_it_propagates_not_authenticated_error_when_refresh_returns_none() -> None:
-    """It should propagate NotAuthenticatedError if token refresh returns None."""
-
-    class AuthServiceDouble(AuthServiceSpy):
-        def get_or_refresh_access_token(self, store: bool) -> str | None:
-            if self.token_fetch_count == 0:
-                self.token_fetch_count = 1
-                return self.fetched_token
-            return None  # simulate failure to refresh token
-
-    class JobServiceDouble(JobServiceSpy):
-        def wait_for_result(
-            self,
-            token: str,
-            job_id: UUID,
-            *,
-            query_interval_seconds: float = 1.0,
-            wait: Callable[[float], None] = time.sleep,
-            max_attempts: int = 600,
-            out: TextIO = sys.stdout,
-            report_state: Callable[[NonFinalJobState], None] | None = None,
-        ) -> FinalJobState:
-            raise NotAuthenticatedError
-
-    app = ArnicaApp(ArnicaConfig())
-    app.auth_service = AuthServiceDouble()
-    app.job_service = JobServiceDouble()
-
-    with pytest.raises(NotAuthenticatedError):
-        wait_for_final_state(app, uuid4())
-
-
-def test_it_propagates_not_authenticated_error_when_refresh_returns_same_token() -> None:
-    """It should propagate NotAuthenticatedError if token refresh returns the same token."""
-
-    class AuthServiceDouble(AuthServiceSpy):
-        def get_or_refresh_access_token(self, store: bool) -> str | None:
-            return self.fetched_token
-
-    class JobServiceDouble(JobServiceSpy):
-        def wait_for_result(
-            self,
-            token: str,
-            job_id: UUID,
-            *,
-            query_interval_seconds: float = 1.0,
-            wait: Callable[[float], None] = time.sleep,
-            max_attempts: int = 600,
-            out: TextIO = sys.stdout,
-            report_state: Callable[[NonFinalJobState], None] | None = None,
-        ) -> FinalJobState:
-            raise NotAuthenticatedError
-
-    app = ArnicaApp(ArnicaConfig())
-    app.auth_service = AuthServiceDouble()
-    app.job_service = JobServiceDouble()
-
-    with pytest.raises(NotAuthenticatedError):
-        wait_for_final_state(app, uuid4())
+    assert final_state == RRCancelled()
+    assert app.job_service.refresh_callback is not None
+    assert app.job_service.refresh_callback() == app.auth_service.refreshed_token
+    assert app.auth_service.force_refresh_count == 1
 
 
 def test_it_does_not_attempt_refresh_when_static_api_token_and_not_authenticated_error_occurs() -> None:
@@ -258,7 +200,9 @@ def test_it_does_not_attempt_refresh_when_static_api_token_and_not_authenticated
             max_attempts: int = 600,
             out: TextIO = sys.stdout,
             report_state: Callable[[NonFinalJobState], None] | None = None,
+            refresh_token: Callable[[], str | None] | None = None,
         ) -> FinalJobState:
+            self.received_refresh_callback = refresh_token
             raise NotAuthenticatedError
 
     app = ArnicaApp(ArnicaConfig())
@@ -269,6 +213,7 @@ def test_it_does_not_attempt_refresh_when_static_api_token_and_not_authenticated
         wait_for_final_state(app, uuid4(), api_token="provided_token")
 
     assert app.auth_service.token_fetch_count == 0
+    assert app.job_service.received_refresh_callback is None
 
 
 @pytest.mark.parametrize(
@@ -295,6 +240,7 @@ def test_it_propagates_other_exceptions_from_job_service(exception_type: type[Ex
             max_attempts: int = 600,
             out: TextIO = sys.stdout,
             report_state: Callable[[NonFinalJobState], None] | None = None,
+            refresh_token: Callable[[], str | None] | None = None,
         ) -> FinalJobState:
             raise exception_type()
 
@@ -304,44 +250,6 @@ def test_it_propagates_other_exceptions_from_job_service(exception_type: type[Ex
 
     with pytest.raises(exception_type):
         wait_for_final_state(app, uuid4())
-
-
-def test_it_handles_multiple_sequential_token_expiries_and_retries_until_success() -> None:
-    """It should handle multiple sequential NotAuthenticatedError exceptions by refreshing the token until success."""
-
-    class AuthServiceDouble(AuthServiceSpy):
-        def get_or_refresh_access_token(self, store: bool) -> str | None:
-            self.token_fetch_count += 1
-            return f"thisistoken{self.token_fetch_count}"
-
-    class JobServiceDouble(JobService):
-        def __init__(self) -> None:
-            self.call_count = 0
-
-        def wait_for_result(
-            self,
-            token: str,
-            job_id: UUID,
-            *,
-            query_interval_seconds: float = 1.0,
-            wait: Callable[[float], None] = time.sleep,
-            max_attempts: int = 600,
-            out: TextIO = sys.stdout,
-            report_state: Callable[[NonFinalJobState], None] | None = None,
-        ) -> FinalJobState:
-            if self.call_count < 2:
-                self.call_count += 1
-                raise NotAuthenticatedError
-            return RRCancelled()
-
-    app = ArnicaApp(ArnicaConfig())
-    app.auth_service = AuthServiceDouble()
-    app.job_service = JobServiceDouble()
-
-    final_state = wait_for_final_state(app, uuid4())
-
-    assert final_state == RRCancelled()
-    assert app.auth_service.token_fetch_count == 3  # initial + 2 retries
 
 
 @pytest.mark.parametrize("api_token", ["I am a token", None])
@@ -361,7 +269,9 @@ def test_it_passes_report_state_callable_to_job_service(api_token: str | None) -
             max_attempts: int = 600,
             out: TextIO = sys.stdout,
             report_state: Callable[[NonFinalJobState], None] | None = None,
+            refresh_token: Callable[[], str | None] | None = None,
         ) -> FinalJobState:
+            self.refresh_callback = refresh_token
             self.passed_callable = report_state
             if report_state:
                 report_state(expected_state)
