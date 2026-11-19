@@ -5,6 +5,7 @@ from pydantic import ValidationError
 
 from aqt_connector.exceptions import (
     InvalidJobIDError,
+    JobExpiredError,
     JobNotFoundError,
     NotAuthenticatedError,
     RequestError,
@@ -165,6 +166,7 @@ class ArnicaAdapter:
                 401: NotAuthenticatedError,
                 403: NotAuthenticatedError,
                 404: JobNotFoundError,
+                410: JobExpiredError,
                 422: InvalidJobIDError,
                 500: UnknownServerError,
             }

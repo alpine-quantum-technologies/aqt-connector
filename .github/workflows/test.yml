@@ -117,7 +117,7 @@ jobs:
 
   integration_test:
     name: integration-test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: integration_check
     if: ${{ needs.integration_check.outputs.any_changed == 'true' && github.ref == 'refs/heads/main' }}
     

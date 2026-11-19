@@ -1,6 +1,38 @@
+import os
+import stat
 from pathlib import Path
 
+import pytest
+
 from aqt_connector._infrastructure.token_repository import TokenRepository
+
+
+@pytest.mark.skipif(os.name != "posix", reason="POSIX file permissions")
+@pytest.mark.parametrize("token_name", ["access_token", "refresh_token"])
+def test_newly_saved_tokens_are_only_accessible_to_the_owner(tmp_path: Path, token_name: str) -> None:
+    """New token files should have owner-only permissions."""
+    token_path = tmp_path / token_name
+
+    token_repo = TokenRepository(tmp_path)
+    getattr(token_repo, f"save_{token_name}")("new-token")
+
+    assert stat.S_IMODE(token_path.stat().st_mode) == 0o600
+    assert token_path.read_text() == "new-token"
+
+
+@pytest.mark.skipif(os.name != "posix", reason="POSIX file permissions")
+@pytest.mark.parametrize("token_name", ["access_token", "refresh_token"])
+def test_existing_tokens_are_only_accessible_to_the_owner(tmp_path: Path, token_name: str) -> None:
+    """Overwritten token files should have owner-only permissions."""
+    token_path = tmp_path / token_name
+    token_path.write_text("old-token")
+    token_path.chmod(0o644)
+
+    token_repo = TokenRepository(tmp_path)
+    getattr(token_repo, f"save_{token_name}")("new-token")
+
+    assert stat.S_IMODE(token_path.stat().st_mode) == 0o600
+    assert token_path.read_text() == "new-token"
 
 
 def test_it_saves_the_token_to_the_app_dir(tmp_path: Path) -> None:

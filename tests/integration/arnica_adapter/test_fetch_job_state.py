@@ -15,13 +15,36 @@ from aqt_connector.exceptions import (
 from aqt_connector.models.arnica.response_bodies.jobs import RRQueued
 from tests.integration.arnica_adapter.conftest import ArnicaAdapterFactory
 
+base_url = "https://arnica.example.com"
 queued_job_id = UUID("98d265ec-99fb-4edd-90d0-3d745307bf7b")
 expired_job_id = UUID("64db2fca-4857-4463-90c4-45cbdf0d59d8")
 
 
-def test_it_fetches_job_state_successfully(arnica_adapter: ArnicaAdapter, auth_token: str) -> None:
+@pytest.mark.simulated
+def test_it_fetches_job_state_successfully() -> None:
     """It should return the job's state."""
-    state = arnica_adapter.fetch_job_state(auth_token, job_id=queued_job_id)
+
+    job_id = uuid4()
+
+    def return_queued_job(request: httpx.Request) -> httpx.Response:
+        assert request.method == "GET"
+        assert request.url.path == f"/v1/result/{job_id}"
+        assert request.headers["Authorization"] == "Bearer dummy_token"
+        return httpx.Response(
+            status_code=200,
+            json={
+                "job": {
+                    "job_id": str(job_id),
+                    "resource_id": "resource",
+                    "workspace_id": "workspace",
+                },
+                "response": {"status": "queued"},
+            },
+        )
+
+    arnica_adapter = ArnicaAdapter(base_url=base_url)
+    arnica_adapter._http_client = httpx.Client(transport=httpx.MockTransport(return_queued_job))
+    state = arnica_adapter.fetch_job_state("dummy_token", job_id=job_id)
 
     assert state == RRQueued()
 
