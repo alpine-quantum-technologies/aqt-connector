@@ -11,7 +11,7 @@ def test_it_gets_an_available_access_token() -> None:
         def __init__(self):
             self.token = "thisisthestoredtoken"
 
-        def get_or_refresh_access_token(self, store: bool) -> str | None:
+        def get_or_refresh_access_token(self, store: bool, *, force_refresh: bool = False) -> str | None:
             return self.token
 
     app = ArnicaApp(ArnicaConfig())
@@ -28,7 +28,7 @@ def test_it_returns_none_if_no_access_token_available() -> None:
     class AuthServiceDummy(AuthService):
         def __init__(self): ...
 
-        def get_or_refresh_access_token(self, store: bool) -> str | None:
+        def get_or_refresh_access_token(self, store: bool, *, force_refresh: bool = False) -> str | None:
             return None
 
     app = ArnicaApp(ArnicaConfig())
@@ -47,7 +47,7 @@ def test_it_stores_access_token_if_configured(store_access_token: bool) -> None:
         def __init__(self):
             self.stored = False
 
-        def get_or_refresh_access_token(self, store: bool) -> str | None:
+        def get_or_refresh_access_token(self, store: bool, *, force_refresh: bool = False) -> str | None:
             self.stored = store
             return "newaccesstoken"
 

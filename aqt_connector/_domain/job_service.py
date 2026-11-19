@@ -6,7 +6,7 @@ from typing import TextIO, cast
 from uuid import UUID
 
 from aqt_connector._infrastructure.arnica_adapter import ArnicaAdapter
-from aqt_connector.exceptions import RequestError
+from aqt_connector.exceptions import NotAuthenticatedError, RequestError
 from aqt_connector.models.arnica.request_bodies.jobs import QuantumCircuits
 from aqt_connector.models.arnica.response_bodies.jobs import (
     FinalJobState,
@@ -84,6 +84,7 @@ class JobService:
         max_attempts: int = 600,  # 10 minutes (average)
         out: TextIO = sys.stdout,
         report_state: Callable[[NonFinalJobState], None] | None = None,
+        refresh_token: Callable[[], str | None] | None = None,
     ) -> FinalJobState:
         """Waits for the job with the given ID to complete and returns its final state.
 
@@ -99,6 +100,7 @@ class JobService:
             max_attempts (int, optional): The maximum number of attempts to query the job state. Defaults to 600.
             out (TextIO, optional): text stream to send output to. Defaults to sys.stdout.
             report_state (Callable[[NonFinalJobState], None], optional): Callable to report state.
+            refresh_token (Callable[[], str | None] | None, optional): refreshes the token after server rejection.
 
         Raises:
             NotAuthenticatedError: If the provided token is invalid or expired.
@@ -114,15 +116,28 @@ class JobService:
         attempts = 0
         while True:
             attempts += 1
+            job_state: JobState | None = None
             try:
                 job_state = self.arnica.fetch_job_state(token, job_id)
+            except NotAuthenticatedError:
+                if refresh_token is None:
+                    raise
+                refreshed_token = refresh_token()
+                if not refreshed_token or refreshed_token == token:
+                    raise
+                token = refreshed_token
+                try:
+                    job_state = self.arnica.fetch_job_state(token, job_id)
+                except RequestError as err:
+                    out.write(f"Transient ({type(err).__name__}) error encountered while fetching job state: {err}.\n")
+            except RequestError as err:
+                out.write(f"Transient ({type(err).__name__}) error encountered while fetching job state: {err}.\n")
+
+            if job_state is not None:
                 if job_state.is_finished():
                     return cast(FinalJobState, job_state)
                 if report_state:
                     report_state(cast(NonFinalJobState, job_state))
-
-            except RequestError as err:
-                out.write(f"Transient ({type(err).__name__}) error encountered while fetching job state: {err}.\n")
 
             if attempts == max_attempts:
                 raise TimeoutError(f"Timed out after {attempts} attempts waiting for job to finish.")

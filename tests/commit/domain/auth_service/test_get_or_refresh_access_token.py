@@ -1,5 +1,3 @@
-import pytest
-
 from aqt_connector._data_types import OfflineAccessTokens
 from aqt_connector._domain.auth_service import AuthService
 from aqt_connector._domain.oidc_service import OIDCService
@@ -121,18 +119,61 @@ def test_it_refreshes_invalid_access_token_when_refresh_token_stored() -> None:
     assert oidc_service.given_refresh_token == token_repo.existing_refresh_token
 
 
-@pytest.mark.parametrize("store", [True, False])
-def test_it_respects_store_parameter_when_refreshing_token(store: bool) -> None:
-    """It should store the refreshed access token only when the store parameter is true."""
+def test_it_force_refreshes_a_valid_access_token_and_stores_it() -> None:
+    """A server rejection should force refresh and store the token when requested."""
+    token_repo = TokenRepositoryWithRefreshToken()
+    oidc_service = OIDCServiceAlwaysRefreshes()
+    auth_service = AuthService(AccessTokenVerifierAlwaysVerifies(), token_repo, oidc_service)
+
+    loaded_token = auth_service.get_or_refresh_access_token(store=True, force_refresh=True)
+
+    assert loaded_token == oidc_service.access_token
+    assert oidc_service.given_refresh_token == token_repo.existing_refresh_token
+    assert token_repo.saved_access_token == oidc_service.access_token
+    assert token_repo.saved_refresh_token == oidc_service.next_refresh_token
+
+
+def test_it_force_refreshes_a_valid_access_token_without_storing() -> None:
+    """A server rejection should force refresh without storing when requested."""
+    token_repo = TokenRepositoryWithRefreshToken()
+    oidc_service = OIDCServiceAlwaysRefreshes()
+    auth_service = AuthService(AccessTokenVerifierAlwaysVerifies(), token_repo, oidc_service)
+
+    loaded_token = auth_service.get_or_refresh_access_token(store=False, force_refresh=True)
+
+    assert loaded_token == oidc_service.access_token
+    assert oidc_service.given_refresh_token == token_repo.existing_refresh_token
+    assert token_repo.saved_access_token is None
+    assert token_repo.saved_refresh_token is None
+
+
+def test_it_returns_none_when_forced_refresh_has_no_refresh_token() -> None:
+    """A forced refresh should not return an access token that the server rejected."""
+    token_repo = TokenRepositoryNoRefreshToken()
+    auth_service = AuthService(AccessTokenVerifierAlwaysVerifies(), token_repo, OIDCServiceAlwaysRefreshes())
+
+    assert auth_service.get_or_refresh_access_token(False, force_refresh=True) is None
+
+
+def test_it_stores_refreshed_tokens_when_requested() -> None:
+    """It should store refreshed access and refresh tokens when requested."""
     token_repo = TokenRepositoryWithRefreshToken()
     oidc_service = OIDCServiceAlwaysRefreshes()
     auth_service = AuthService(AccessTokenVerifierAlwaysRejects(), token_repo, oidc_service)
 
-    _ = auth_service.get_or_refresh_access_token(store)
+    _ = auth_service.get_or_refresh_access_token(store=True)
 
-    if store:
-        assert token_repo.saved_access_token == oidc_service.access_token
-        assert token_repo.saved_refresh_token == oidc_service.next_refresh_token
-    else:
-        assert token_repo.saved_access_token is None
-        assert token_repo.saved_refresh_token is None
+    assert token_repo.saved_access_token == oidc_service.access_token
+    assert token_repo.saved_refresh_token == oidc_service.next_refresh_token
+
+
+def test_it_does_not_store_refreshed_tokens_when_not_requested() -> None:
+    """It should leave stored tokens unchanged when storage is disabled."""
+    token_repo = TokenRepositoryWithRefreshToken()
+    oidc_service = OIDCServiceAlwaysRefreshes()
+    auth_service = AuthService(AccessTokenVerifierAlwaysRejects(), token_repo, oidc_service)
+
+    _ = auth_service.get_or_refresh_access_token(store=False)
+
+    assert token_repo.saved_access_token is None
+    assert token_repo.saved_refresh_token is None

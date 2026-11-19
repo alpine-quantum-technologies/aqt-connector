@@ -77,7 +77,16 @@ def fetch_job_state(app: ArnicaApp, job_id: UUID, *, api_token: str | None = Non
     token = api_token or app.auth_service.get_or_refresh_access_token(app.config.store_access_token)
     if not token:
         raise NotAuthenticatedError("User not authenticated. Please log in.")
-    return app.job_service.fetch_job_state(token, job_id)
+    if api_token:
+        return app.job_service.fetch_job_state(token, job_id)
+
+    try:
+        return app.job_service.fetch_job_state(token, job_id)
+    except NotAuthenticatedError:
+        refreshed = app.auth_service.get_or_refresh_access_token(app.config.store_access_token, force_refresh=True)
+        if not refreshed or refreshed == token:
+            raise
+        return app.job_service.fetch_job_state(refreshed, job_id)
 
 
 def wait_for_final_state(
@@ -132,19 +141,14 @@ def wait_for_final_state(
             report_state=report_state,
         )
 
-    # Token to refresh as needed
-    while True:
-        try:
-            return app.job_service.wait_for_result(
-                token,
-                job_id,
-                query_interval_seconds=query_interval_seconds,
-                max_attempts=max_attempts,
-                out=out,
-                report_state=report_state,
-            )
-        except NotAuthenticatedError:
-            refreshed = app.auth_service.get_or_refresh_access_token(app.config.store_access_token)
-            if not refreshed or refreshed == token:
-                raise
-            token = refreshed
+    return app.job_service.wait_for_result(
+        token,
+        job_id,
+        query_interval_seconds=query_interval_seconds,
+        max_attempts=max_attempts,
+        out=out,
+        report_state=report_state,
+        refresh_token=lambda: app.auth_service.get_or_refresh_access_token(
+            app.config.store_access_token, force_refresh=True
+        ),
+    )
