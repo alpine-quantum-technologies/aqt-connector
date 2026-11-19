@@ -1,5 +1,10 @@
 # Changelog
 
+## aqt-connector 0.7.0
+* Access tokens are now refreshed if they expire during job result polling #59
+* Added fetch resource details #54
+* Fixed an issue in the Arnica adapter that threw a RuntimeError instead of a JobExpiredError when a job has been expired #60
+
 ## aqt-connector 0.6.0
 * Remove the upper limit on the number of circuit qubits #57
 

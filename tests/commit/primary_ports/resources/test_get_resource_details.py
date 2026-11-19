@@ -20,7 +20,7 @@ class AuthServiceSpy(AuthService):
         self.was_token_stored = False
         self.fetched_token: str | None = "thisisthetoken"
 
-    def get_or_refresh_access_token(self, store: bool) -> str | None:
+    def get_or_refresh_access_token(self, store: bool, *, force_refresh: bool = False) -> str | None:
         self.was_token_fetched = True
         self.was_token_stored = store
         return self.fetched_token
