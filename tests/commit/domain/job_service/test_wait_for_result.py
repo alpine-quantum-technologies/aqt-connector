@@ -109,6 +109,30 @@ def test_it_invokes_adapter_with_token_and_job_id() -> None:
     assert adapter_spy.fetch_job_state_called_with[0] == (token, job_id)
 
 
+@pytest.mark.parametrize("max_attempts", [0, -1])
+def test_it_rejects_invalid_max_attempts_before_polling(max_attempts: int) -> None:
+    """It should reject an invalid max_attempts before starting polling."""
+    adapter_spy = ArnicaAdapterSpy()
+    service = JobService(adapter_spy)
+
+    with pytest.raises(ValueError, match="max_attempts must be at least 1"):
+        service.wait_for_result("some-token", uuid4(), max_attempts=max_attempts)
+
+    assert adapter_spy.fetch_job_state_called_with == []
+
+
+@pytest.mark.parametrize("query_interval_seconds", [-0.1, float("nan"), float("inf"), float("-inf")])
+def test_it_rejects_invalid_polling_intervals_before_polling(query_interval_seconds: float) -> None:
+    """It should reject an invalid polling interval before starting polling."""
+    adapter_spy = ArnicaAdapterSpy()
+    service = JobService(adapter_spy)
+
+    with pytest.raises(ValueError, match="query_interval_seconds must be finite and non-negative"):
+        service.wait_for_result("some-token", uuid4(), query_interval_seconds=query_interval_seconds)
+
+    assert adapter_spy.fetch_job_state_called_with == []
+
+
 def test_it_returns_result_if_job_finished() -> None:
     """It should return the result if the job is finished."""
     adapter_spy = ArnicaAdapterSpy()
@@ -145,6 +169,17 @@ def test_it_waits_between_polls() -> None:
     service.wait_for_result("some-token", uuid4(), wait=wait_mock)
 
     assert wait_count == 2
+
+
+def test_zero_interval_waits_zero_seconds_between_polls() -> None:
+    """It should allow a zero second polling interval."""
+    adapter_spy = ArnicaAdapterFinishingSpy()
+    service = JobService(adapter_spy)
+    wait_durations: list[float] = []
+
+    service.wait_for_result("some-token", uuid4(), query_interval_seconds=0, wait=wait_durations.append)
+
+    assert wait_durations == [0, 0]
 
 
 @pytest.mark.parametrize("query_interval_seconds", [1.0, 2.0, 5.0])

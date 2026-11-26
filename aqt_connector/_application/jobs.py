@@ -1,3 +1,4 @@
+import math
 import sys
 from collections.abc import Callable
 from typing import TextIO
@@ -110,7 +111,9 @@ def wait_for_final_state(
         api_token (str | None, optional): a static API token to use for authentication. This will be used
             in place of any token retrieved when logging in. Defaults to None.
         query_interval_seconds (float, optional): The base interval between job state queries. Defaults to 1.0.
+            Must be finite and non-negative; zero disables waiting between polls.
         max_attempts (int, optional): The maximum number of attempts to query the job state. Defaults to 600.
+            Must be at least 1.
         out (TextIO, optional): text stream to send output to. Defaults to sys.stdout.
         report_state (Callable[[NonFinalJobState], None], optional): Callable to report state.
 
@@ -122,10 +125,16 @@ def wait_for_final_state(
         UnknownServerError: If the Arnica API encounters an internal error.
         RuntimeError: For any other unexpected errors.
         TimeoutError: If the maximum wait time is exceeded.
+        ValueError: If max_attempts is less than 1 or query_interval_seconds is negative or nonfinite.
 
     Returns:
         JobState: the final state of the job.
     """
+    if max_attempts < 1:
+        raise ValueError("max_attempts must be at least 1")
+    if not math.isfinite(query_interval_seconds) or query_interval_seconds < 0:
+        raise ValueError("query_interval_seconds must be finite and non-negative")
+
     token = api_token or app.auth_service.get_or_refresh_access_token(app.config.store_access_token)
     if not token:
         raise NotAuthenticatedError("User not authenticated. Please log in.")
