@@ -4,6 +4,7 @@ from aqt_connector._application.jobs import fetch_job_state as fetch_job_state
 from aqt_connector._application.jobs import submit_job as submit_job
 from aqt_connector._application.jobs import wait_for_final_state as wait_for_final_state
 from aqt_connector._application.resources import get_resource_details as get_resource_details
+from aqt_connector._application.workspaces import get_workspaces as get_workspaces
 from aqt_connector._arnica_app import ArnicaApp as ArnicaApp
 from aqt_connector._sdk_config import ArnicaConfig as ArnicaConfig
 
@@ -15,5 +16,6 @@ __all__ = [
     "submit_job",
     "wait_for_final_state",
     "get_resource_details",
+    "get_workspaces",
     "ArnicaConfig",
 ]
