@@ -1,3 +1,4 @@
+import math
 import random
 import sys
 import time
@@ -95,9 +96,11 @@ class JobService:
         Args:
             token (str): The authentication token to use.
             job_id (UUID): The ID of the job to wait for.
-            query_interval_seconds (float, optional): The base interval between job state queries. Defaults to 1.0.
+            query_interval_seconds (float, optional): The base interval between job state queries. Must be finite
+                and non-negative; zero disables waiting between polls. Defaults to 1.0.
             wait (callable, optional): A callable that takes a duration in seconds to wait. Defaults to time.sleep.
-            max_attempts (int, optional): The maximum number of attempts to query the job state. Defaults to 600.
+            max_attempts (int, optional): The maximum number of attempts to query the job state. Must be at least 1.
+                Defaults to 600.
             out (TextIO, optional): text stream to send output to. Defaults to sys.stdout.
             report_state (Callable[[NonFinalJobState], None], optional): Callable to report state.
             refresh_token (Callable[[], str | None] | None, optional): refreshes the token after server rejection.
@@ -109,10 +112,16 @@ class JobService:
             UnknownServerError: If the Arnica API encounters an internal error.
             RuntimeError: For any other unexpected errors.
             TimeoutError: If the job does not complete within the maximum number of attempts.
+            ValueError: If max_attempts is less than 1 or query_interval_seconds is negative or nonfinite.
 
         Returns:
             JobState: The final state of the job once it has completed.
         """
+        if max_attempts < 1:
+            raise ValueError("max_attempts must be at least 1")
+        if not math.isfinite(query_interval_seconds) or query_interval_seconds < 0:
+            raise ValueError("query_interval_seconds must be finite and non-negative")
+
         attempts = 0
         while True:
             attempts += 1

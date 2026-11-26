@@ -121,6 +121,34 @@ def test_it_raises_if_no_token_available_initially() -> None:
         wait_for_final_state(app, uuid4())
 
 
+@pytest.mark.parametrize("max_attempts", [0, -1])
+def test_it_rejects_invalid_max_attempts_before_authentication(max_attempts: int) -> None:
+    """It should reject invalid max attempts before attempting authentication."""
+    app = ArnicaApp(ArnicaConfig())
+    app.auth_service = AuthServiceSpy()
+    app.job_service = JobServiceSpy()
+
+    with pytest.raises(ValueError, match="max_attempts must be at least 1"):
+        wait_for_final_state(app, uuid4(), max_attempts=max_attempts)
+
+    assert app.auth_service.token_fetch_count == 0
+    assert app.job_service.requested_job_id is None
+
+
+@pytest.mark.parametrize("query_interval_seconds", [-0.1, float("nan"), float("inf"), float("-inf")])
+def test_it_rejects_invalid_polling_intervals_before_authentication(query_interval_seconds: float) -> None:
+    """It should reject an invalid polling interval before attempting authentication."""
+    app = ArnicaApp(ArnicaConfig())
+    app.auth_service = AuthServiceSpy()
+    app.job_service = JobServiceSpy()
+
+    with pytest.raises(ValueError, match="query_interval_seconds must be finite and non-negative"):
+        wait_for_final_state(app, uuid4(), query_interval_seconds=query_interval_seconds)
+
+    assert app.auth_service.token_fetch_count == 0
+    assert app.job_service.requested_job_id is None
+
+
 def test_passes_query_interval_max_attempts_and_out_to_job_service() -> None:
     """It should request the job state with the correct parameters."""
     app = ArnicaApp(ArnicaConfig())
