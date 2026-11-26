@@ -5,7 +5,8 @@ from collections.abc import Iterator
 from pydantic import BaseModel, Field, RootModel, model_validator
 from typing_extensions import Self
 
-from aqt_connector.models.operations import Gate, Measure, OperationModel, is_gate
+from aqt_connector.models.common.operations import Measure
+from aqt_connector.models.types import Gate, OperationModel, is_gate
 
 
 class Circuit(RootModel[list[OperationModel]]):

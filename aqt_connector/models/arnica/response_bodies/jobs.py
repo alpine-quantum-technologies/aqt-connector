@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field
 
 from aqt_connector.models import BaseModelSerialisable
 from aqt_connector.models.arnica.jobs import BasicJobMetadata, JobStatus, StatusChange
-from aqt_connector.models.operations import Bit
+from aqt_connector.models.common.operations import Bit
 
 
 class BaseResponse(BaseModel):

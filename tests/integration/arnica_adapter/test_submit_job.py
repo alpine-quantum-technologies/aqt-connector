@@ -16,8 +16,9 @@ from aqt_connector.exceptions import (
 from aqt_connector.models.arnica.jobs import BasicJobMetadata, JobType
 from aqt_connector.models.arnica.request_bodies.jobs import QuantumCircuits, SubmitJobRequest
 from aqt_connector.models.arnica.response_bodies.jobs import SubmitJobResponse
-from aqt_connector.models.circuits import Circuit, Measure, OperationModel, QuantumCircuit
-from aqt_connector.models.operations import GateRZ
+from aqt_connector.models.circuits import Circuit, Measure, QuantumCircuit
+from aqt_connector.models.common.operations import GateRZ
+from aqt_connector.models.types import OperationModel
 from tests.integration.arnica_adapter.conftest import ArnicaAdapterFactory
 
 workspace_id = "workspace"
