@@ -17,7 +17,6 @@ from pydantic import (
     ConfigDict,
     Field,
     RootModel,
-    ValidationError,
     field_validator,
 )
 from pydantic.types import NonNegativeInt, conint
@@ -101,7 +100,7 @@ class GateRXX(AbstractGate):
     def validate_qubits_unique(cls, v: list[NonNegativeInt]) -> list[NonNegativeInt]:
         """Constraint unique_items does not work for Tuple, therefore we are using a custom validator."""
         if v[0] == v[1]:
-            raise ValidationError("addressed qubits must be unique")
+            raise ValueError("addressed qubits must be unique")
         return v
 
     @final
