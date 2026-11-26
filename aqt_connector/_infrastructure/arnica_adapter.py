@@ -1,7 +1,7 @@
 from uuid import UUID
 
 import httpx
-from pydantic import ValidationError
+from pydantic import TypeAdapter, ValidationError
 
 from aqt_connector.exceptions import (
     InvalidJobIDError,
@@ -16,6 +16,7 @@ from aqt_connector.exceptions import (
 from aqt_connector.models.arnica.request_bodies.jobs import QuantumCircuits, SubmitJobRequest
 from aqt_connector.models.arnica.response_bodies.jobs import JobState, ResultResponse, SubmitJobResponse
 from aqt_connector.models.arnica.response_bodies.resources import ResourceDetails
+from aqt_connector.models.arnica.response_bodies.workspaces import Workspace
 
 
 class ArnicaAdapter:
@@ -76,6 +77,43 @@ class ArnicaAdapter:
             raise RuntimeError from exc
 
         except ValidationError as exc:
+            raise UnknownServerError from exc
+
+    def get_workspaces(self, token: str) -> list[Workspace]:
+        """Fetches the workspaces available to the user from the Arnica API.
+
+        Args:
+            token (str): The authentication token to access the Arnica API.
+
+        Raises:
+            RequestError: If there is a network-related error during the request.
+            NotAuthenticatedError: If the provided token is invalid or expired.
+            UnknownServerError: If the Arnica API encounters an internal error or returns an invalid response.
+            RuntimeError: For any other unexpected errors.
+
+        Returns:
+            list[Workspace]: The workspaces available to the user.
+        """
+        endpoint_url = f"{self._base_url}/v1/workspaces"
+
+        try:
+            response = self._http_client.get(endpoint_url, headers={"Authorization": f"Bearer {token}"})
+            response.raise_for_status()
+            return TypeAdapter(list[Workspace]).validate_json(response.text)
+
+        except httpx.RequestError as exc:
+            raise RequestError from exc
+
+        except httpx.HTTPStatusError as exc:
+            exception_map = {
+                401: NotAuthenticatedError,
+                500: UnknownServerError,
+            }
+            if exc.response.status_code in exception_map:
+                raise exception_map[exc.response.status_code] from exc
+            raise RuntimeError from exc
+
+        except (ValidationError, ValueError) as exc:
             raise UnknownServerError from exc
 
     def submit_job(
