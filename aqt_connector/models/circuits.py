@@ -35,12 +35,13 @@ class Circuit(RootModel[list[OperationModel]]):
     @property
     def number_of_qubits(self) -> int:
         """Number of qubits used by this circuit."""
-        # The circuit consists only of one MEASURE operation
-        if len(self.root) == 1:
-            return 0
         qubits: set[int] = set()
         for gate in self.gates():
             qubits = qubits.union(gate.get_qubits())
+
+        # The circuit consists only of MEASURE and/or BARRIER operations
+        if len(qubits) == 0:
+            return 0
         return max(qubits) + 1
 
 
