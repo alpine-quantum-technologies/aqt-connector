@@ -5,7 +5,6 @@ from __future__ import annotations
 from uuid import uuid4
 
 import pytest
-from aqt_connector.models.types import OperationModel
 from pytest_httpserver import HTTPServer
 
 from aqt_connector import ArnicaApp, submit_job
@@ -15,6 +14,7 @@ from aqt_connector.models.arnica.request_bodies.jobs import QuantumCircuits, Sub
 from aqt_connector.models.arnica.response_bodies.jobs import SubmitJobResponse
 from aqt_connector.models.circuits import Circuit, Measure, QuantumCircuit
 from aqt_connector.models.common.operations import GateRZ
+from aqt_connector.models.types import OperationModel
 from tests.acceptance.conftest import JWTFactory
 
 
