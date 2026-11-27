@@ -19,15 +19,6 @@ class Barrier(AbstractOperation):
     operation: Literal["BARRIER"]
 
 
-class GlobalGate(AbstractGate):
-    """Abstract global qubit rotation."""
-
-    @final
-    def get_qubits(self) -> Literal["global"]:
-        """All qubits."""
-        return "global"
-
-
 class GateRX(SingleQubitGate):
     r"""### A single-qubit rotation around the Bloch sphere's x-axis."""
 
@@ -37,18 +28,6 @@ class GateRX(SingleQubitGate):
 
     theta: float = Field(ge=-1.0, le=1.0)
     operation: Literal["RX"]
-
-
-class GateRGlobal(GlobalGate):
-    r"""### A global single-qubit rotation around an arbitrary axis on the Bloch sphere's equatorial plane."""
-
-    def __init__(self, **data: Any) -> None:
-        data["operation"] = "RGlobal"
-        super().__init__(**data)
-
-    phi: float = Field(ge=-2.0, le=2.0)
-    theta: float = Field(ge=-1.0, le=1.0)
-    operation: Literal["RGlobal"]
 
 
 class GateRZZ(AbstractGate):
